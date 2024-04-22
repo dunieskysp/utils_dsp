@@ -6,7 +6,7 @@ Comprimir ficheros y directorios.
 
 from pathlib import Path
 from shutil import make_archive, unpack_archive
-from outputstyles import error, info
+from outputstyles import error, info, warning
 from utilsdsp import validate_path, delete_dir
 
 
@@ -42,7 +42,7 @@ def compress(path_src: str, path_dst: str = "", compress_type: str = "zip", base
 
     # Comprobar que no exista el fichero comprimido en la ruta de destino.
     if path_filecompress.exists() and not overwrite:
-        print(error("Ya existe:", "ico"), info(path_filecompress))
+        print(warning("Ya existe:", "ico"), info(path_filecompress))
         return
 
     # Procedemos a crear el fichero comprimido.
@@ -100,6 +100,11 @@ def uncompress(path_src: str, path_dst: str = "", delete_src: bool = False) -> s
     # Construir rutas absolutas para evitar problemas con rutas relativas.
     path_src = Path(path_src).resolve()
     path_dst = Path(path_dst).resolve() if path_dst else path_src.parent
+
+    # Comprobar que sea un fichero admitido.
+    if not path_src.suffix in [".zip", ".tar", ".gztar", ".bztar", ".xztar"]:
+        print(warning("Fichero no admitido:", "ico"), info(path_src))
+        return
 
     # Procedemos a descomprimir el fichero.
     try:
