@@ -5,8 +5,8 @@ Operaciones con ficheros.
 """
 
 from pathlib import Path
-from outputstyles import error, info
-from utilsdsp import create_dir
+from outputstyles import error, info, warning
+from utilsdsp import create_dir, validate_path
 
 
 def read_file(path_file: str | object, by_line: bool = True) -> list:
@@ -20,6 +20,10 @@ def read_file(path_file: str | object, by_line: bool = True) -> list:
     Returns:
     list: El contenido del fichero por líneas o un string.
     """
+
+    # Comprobar que exista el fichero.
+    if not validate_path(path_file):
+        return
 
     # Construir rutas absolutas para evitar problemas con rutas relativas.
     path_file = Path(path_file).resolve()
@@ -36,7 +40,7 @@ def read_file(path_file: str | object, by_line: bool = True) -> list:
         if by_line:
             return path_file.read_text("utf-8").split("\n")
 
-        # Retornar el resultado en una sola cadena todo.
+        # Retornar el resultado en una cadena todo.
         return path_file.read_text("utf-8")
 
     except Exception as err:
@@ -57,15 +61,25 @@ def write_file(path_file: str | list, content_write: str) -> str:
     str: Ruta del fichero guardado.
     """
 
+    # Comprobar que el contenido no este vacio.
+    if not content_write:
+        print(warning("El contenido no puede estar vacio.", "ico"))
+        return
+
     # Construir rutas absolutas para evitar problemas con rutas relativas.
     path_file = Path(path_file).resolve()
 
-    # Crear si no existe la ruta padre.
+    # Comprobar sí existe y no es un fichero.
+    if path_file.exists() and not path_file.is_file():
+        print(warning("Ya existe y no es un fichero.", "ico"), info(path_file))
+        return
+
+    # Crear sí no existe la ruta padre.
     create_dir(path_file.parent)
 
     try:
 
-        # Si es una lista, lo escribimos por lineas.
+        # Sí es una lista, lo escribimos por lineas.
         if isinstance(content_write, list):
 
             # Comprobar sí existe el fichero.
@@ -88,7 +102,7 @@ def write_file(path_file: str | list, content_write: str) -> str:
             # Escribimos el contenido en el fichero por lineas.
             path_file.write_text("\n".join(content), "utf-8")
 
-        # Si es un texto u otro, lo guardamos tal y como viene.
+        # Sí es un texto u otro, lo guardamos tal y como viene.
         else:
 
             # Comprobar sí existe el fichero.
