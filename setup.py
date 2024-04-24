@@ -15,6 +15,9 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/dunieskysp/utils_dsp',
     packages=find_packages(),
+    install_requires=[
+        "outputstyles==1.0.0",
+    ],
     keywords=['python', 'utilsdsp'],
     classifiers=[
         "Development Status :: 3 - Alpha",
