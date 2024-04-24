@@ -38,13 +38,20 @@ Obtener tamaño de ficheros y directorios.
 Comprimir ficheros y directorios.
     - compress()
     - uncompress()
+
+Oras funciones útiles.
+    - obtain_URLfromHTML()
+    - print_header()
+    - clear_output()
+    - calc_IMGdimensions()
+    - optain_similarVars()
 """
 
 # Útiles de rutas.
 from utilsdsp.utilsdsp_path import obtain_currentpath, obtain_absolutepath, change_currentpath, validate_path, join_path, obtain_defaultpath, obtain_downloadspath
 
 # Útiles de directorios.
-from utilsdsp.utilsdsp_dirs import create_dir, create_downloadsdir, create_symboliclink, delete_dir, select_files, move_dir, copy_dir, rename_dir
+from utilsdsp.utilsdsp_dirs import create_dir, create_downloadsdir, create_symboliclink, delete_dir, select_contentdir, move_dir, copy_dir, rename_dir
 
 # Útiles de ficheros.
 from utilsdsp.utilsdsp_files import read_file, write_file
@@ -57,3 +64,6 @@ from utilsdsp.utilsdsp_sizefile import natural_size, obtain_sizedir, obtain_size
 
 # Comprimir ficheros y directorios.
 from utilsdsp.utilsdsp_compress import compress, uncompress
+
+# Otras funciones útiles.
+from utilsdsp.utilsdsp_others import obtain_URLfromHTML, print_header, clear_output, calc_IMGdimensions, optain_similarVars
