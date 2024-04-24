@@ -8,7 +8,7 @@ Obtener tamaño de ficheros y directorios.
 
 import os
 from pathlib import Path
-from outputstyles import error, success, warning, info, bold
+from outputstyles import error, info, warning
 from utilsdsp import validate_path
 
 
@@ -23,6 +23,13 @@ def natural_size(size_file: int, unit: str = "") -> str:
     Returns:
     srt: Devuelve el tamaño del fichero en bytes, KB, MB, GB o TB.
     """
+
+    # Comprobar que sea válido el tamaño del fichero o directorio.
+    if not isinstance(size_file, int):
+        return warning("El tamaño debe ser un número y mayor que 0.", "ico")
+
+    if size_file <= 0:
+        return "0 bytes"
 
     # Unidades y sus valores en que se va a expresar el resultado.
     units = {
