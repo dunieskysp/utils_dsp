@@ -18,7 +18,7 @@ from outputstyles import error, success, warning, info, bold
 from utilsdsp import obtain_defaultpath, obtain_downloadspath, validate_path
 
 
-# NOTE: Crear y eliminar.
+# NOTE: Crear directorios.
 def create_dir(path_src: str | object, parents: bool = True, print_msg: bool = False) -> str:
     """
     Crear Directorio(s).
@@ -175,6 +175,7 @@ def create_symboliclink(path_src: str, path_dst: str, delete_dst: bool = False) 
         print(err)
 
 
+# NOTE: Eliminar directorios.
 def delete_dir(path_src: str | object, print_msg: bool = True) -> bool:
     """
     Eliminar un directorio o fichero.
@@ -224,10 +225,10 @@ def delete_dir(path_src: str | object, print_msg: bool = True) -> bool:
     return
 
 
-# NOTE: Seleccionar ficheros en un directorio.
-def select_files(path_src: str | object, file_type: str = "*", recursive: bool = False, print_msg: bool = True) -> list:
+# NOTE: Seleccionar ficheros y subdirectorios dentro de un directorio.
+def select_contentdir(path_src: str | object, file_type: str = "", recursive: bool = False, print_msg: bool = True) -> list:
     """
-    Seleccionar todos los ficheros de un mismo tipo en un directorio.
+    Seleccionar todo el contenido de en un directorio.
 
     Parameters:
     path_src (str | object Path): Ruta del directorio raíz.
@@ -236,7 +237,7 @@ def select_files(path_src: str | object, file_type: str = "*", recursive: bool =
     print_msg (bool) [Opcional]: Imprimir mensaje sí no hay ficheros.
 
     Returns:
-    list: Lista objetos (Path) de los ficheros encontrados.
+    list: Lista de objetos (Path) de los ficheros encontrados.
     """
 
     # Comprobar que exista el directorio.
@@ -246,21 +247,27 @@ def select_files(path_src: str | object, file_type: str = "*", recursive: bool =
     # Construir rutas absolutas para evitar problemas con rutas relativas.
     path_src = Path(path_src).resolve()
 
+    # Seleccionamos todo, sí no hay tipos de de ficheros.
+    file_type = f'*.{file_type}' if file_type else '*'
+
     # Buscar en el directorio raíz y en sus sub-directorios.
     if recursive:
-        result = [item for item in path_src.rglob(f'*.{file_type}')]
+        result = [item for item in path_src.rglob(file_type)]
 
     # Buscar solo en el directorio raíz.
     else:
-        result = [item for item in path_src.glob(f'*.{file_type}')]
+        result = [item for item in path_src.glob(file_type)]
 
     # Comprobar que se hayan encontrados ficheros.
     if not result and print_msg:
 
-        print(
-            warning(f'No hay ficheros {file_type.upper()} en:', "ico"),
-            info(path_src)
-        )
+        if file_type in ["*", "*.*"]:
+            msg = 'No hay contenido en:'
+
+        else:
+            msg = f'No hay ficheros {file_type.upper().replace("*.","")} en:'
+
+        print(warning(msg, "ico"), info(path_src))
 
     return result
 
@@ -307,8 +314,9 @@ def prepare_paths(path_src: str | object, path_dst: str | object, overwrite: boo
             print(warning("Ya existe:", "ico"), info(path_dst_final))
             return
 
-    # Crear el directorio de destino si no existe.
-    create_dir(path_dst)
+    # Crear el directorio de destino sí no existe.
+    if not create_dir(path_dst):
+        return
 
     # Mensaje pre-elaborado.
     msg = f'{info(path_src)}\n  {bold("hacia:")} {info(path_dst)}'
