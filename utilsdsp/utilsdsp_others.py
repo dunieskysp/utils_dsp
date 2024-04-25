@@ -10,7 +10,7 @@ Oras funciones útiles.
 import os
 from pathlib import Path
 from utilsdsp import validate_path, read_file
-from outputstyles import warning, error, info
+from outputstyles import warning, error, info, bold
 
 
 def obtain_URLfromHTML(path_src: str | object, num_line: int = 3) -> str:
@@ -188,3 +188,51 @@ def optain_similarVars(var_name: str, var_cant: int, all_vars: dict, value: bool
 
     except Exception as err:
         print(error("Error al obtener la variable:", "ico"), err)
+
+
+def joinlist_to_dict(key_list: list, value_list: list, data_to_str: bool = True) -> dict:
+    """
+    Unir dos listas en un diccionario.
+
+    Parameters:    
+    key_list (list): Lista con las llaves.
+    value_list (list): Lista con los valores.
+    data_to_str (bool) [Opcional]: Convertir los datos a string.
+
+    Ej (Deben tener la misma longitud):
+    - key_list = ["txt", "jpg"]
+    - value_list = ["Textos", "Imagenes"]
+
+    Returns:
+    dict: Discionario con las llaves y valores asociados.
+    """
+
+    def __liststr(data_list: list) -> list:
+        """
+        Convertir los datos de una lista a string.
+        """
+
+        return [str(item) for item in data_list]
+
+    # Comprobar que se correspondan las longitudes.
+    if len(key_list) != len(value_list):
+
+        print(warning("Las longitudes no se corresponden:", "ico"))
+        print(bold("Keys:"), key_list)
+        print(bold("Values:"), value_list)
+
+        return
+
+    # Convertir los datos a string.
+    if data_to_str:
+
+        key_list = __liststr(key_list)
+        value_list = __liststr(value_list)
+
+    # Relacionar las dos listas en un diccionario.
+    try:
+        return {ext: folder for ext, folder in zip(key_list, value_list)}
+
+    except Exception as err:
+        print(error("No se pudo crear el diccionario desde las dos listas.", "ico"))
+        return

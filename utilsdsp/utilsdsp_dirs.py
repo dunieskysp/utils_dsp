@@ -7,6 +7,7 @@ Operaciones con directorios.
     - select_files()
     - prepare_paths()
     - move_dir()
+    - move_files()
     - copy_dir()
     - rename_dir()
 """
@@ -225,6 +226,51 @@ def delete_dir(path_src: str | object, print_msg: bool = True) -> bool:
     return
 
 
+def del_emptydirs(path_src: str | object, print_msg: bool = True) -> None:
+    """
+    Borrar recursivamente los sub-directorios vacios.
+
+    Parameters:
+    path_scan (str | object Path): Ruta del directorio raíz.
+    print_msg (bool) [Opcional]: Imprimir mensaje satisfactorio.
+
+    Returns:
+    None.
+    """
+
+    # Comprobar que exista el directorio o fichero.
+    if not validate_path(path_src):
+        return
+
+    # Construir rutas absolutas para evitar problemas con rutas relativas.
+    path_src = Path(path_src).resolve()
+
+    # Obtener todos los subdirectorios.
+    all_subdirs = [item for item in path_src.rglob("*") if item.is_dir()]
+
+    # Ordenar reversamente la lista
+    all_subdirs.sort(reverse=True)
+
+    # Borrar todos los subdirectorios vacios
+    for subdir in all_subdirs:
+
+        # Verificar que este vacio el directorio.
+        if not any(subdir.glob("*")):
+
+            try:
+
+                # Borrar sub-directorio actual.
+                subdir.rmdir()
+
+                if print_msg:
+                    print(success("Borrado:", "ico"), info(subdir))
+
+            except Exception as err:
+
+                print(error("No se pudo borrar:", "ico"), info(subdir))
+                print(err)
+
+
 # NOTE: Seleccionar ficheros y subdirectorios dentro de un directorio.
 def select_contentdir(path_src: str | object, file_type: str = "", recursive: bool = False, print_msg: bool = True) -> list:
     """
@@ -324,13 +370,13 @@ def prepare_paths(path_src: str | object, path_dst: str | object, overwrite: boo
     return path_src, path_dst, path_dst_final, msg
 
 
-def move_dir(path_src: str, path_dst: str, print_msg: bool = False, overwrite: bool = False) -> str:
+def move_dir(path_src: str | object, path_dst: str | object, print_msg: bool = False, overwrite: bool = False) -> str:
     """
     Mover un fichero o directorio.
 
     Parameters:
-    path_src (str): Ruta del fichero o directorio a mover.
-    path_dst (str): Ruta del directorio al que se va a mover.
+    path_src (str | object Path): Ruta del fichero o directorio a mover.
+    path_dst (str) | object Path: Ruta del directorio al que se va a mover.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
 
@@ -363,13 +409,49 @@ def move_dir(path_src: str, path_dst: str, print_msg: bool = False, overwrite: b
         print(err)
 
 
-def copy_dir(path_src: str, path_dst: str, print_msg: bool = False, overwrite: bool = False) -> str:
+def move_files(files: list, path_dst: str | object, print_msg: bool = False, overwrite: bool = False, file_type: str = "*") -> None:
+    """
+    Mover una lista de ficheros o directorios.
+
+    Parameters:
+    files (list): Lista con las rutas (str | object Path) a mover.
+    path_dst (str) | object Path: Ruta del directorio al que se va a mover.
+    print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
+    overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
+    file_type (srt) [Opcional]: Tipo de ficheros a mover.
+
+    Returns:
+    None.
+    """
+
+    if print_msg:
+        print(
+            bold(f'Moviendo ficheros {file_type.upper()} hacia:'),
+            info(path_dst)
+        )
+
+    try:
+        _ = [
+            move_dir(file, path_dst, print_msg, overwrite) for file in files
+        ]
+
+    except Exception as err:
+
+        print(
+            error(
+                f'No se pudieron mover los ficheros {file_type.upper()} hacia:', "ico"),
+            info(path_dst)
+        )
+        print(err)
+
+
+def copy_dir(path_src: str | object, path_dst: str | object, print_msg: bool = False, overwrite: bool = False) -> str:
     """
     Copiar un fichero o directorio.
 
     Parameters:
-    path_src (str): Ruta del fichero o directorio a copiar.
-    path_dst (str): Ruta del directorio al que se va a copiar.
+    path_src (str | object Path): Ruta del fichero o directorio a copiar.
+    path_dst (str | object Path): Ruta del directorio al que se va a copiar.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
 
@@ -410,14 +492,14 @@ def copy_dir(path_src: str, path_dst: str, print_msg: bool = False, overwrite: b
         print(err)
 
 
-def rename_dir(path_src: str, new_name: str, path_dst: str = "",  print_msg: bool = False, overwrite: bool = False) -> str:
+def rename_dir(path_src: str | object, new_name: str, path_dst: str | object = "",  print_msg: bool = False, overwrite: bool = False) -> str:
     """
     Renombrar y/o mover un fichero y directorio.
 
     Parameters:
-    path_src (str): Ruta del fichero o directorio a renombrar.
+    path_src (str | object Path): Ruta del fichero o directorio a renombrar.
     new_name (str): Nuevo nombre del fichero o directorio a renombrar.
-    path_dst (str) [Opcional]: Ruta de destino fichero o directorio renombrado.
+    path_dst (str | object Path) [Opcional]: Ruta de destino fichero o directorio renombrado.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
 
