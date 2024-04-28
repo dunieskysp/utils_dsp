@@ -53,6 +53,16 @@ Organizar los directorios.
     - move_files_to_subdir()
     - organize_files_by_type()
     - organize_files_by_name()
+
+Descargar ficheros desde internet.
+    - validateURL()
+    - obtain_filename()
+    - rename_downloadfile()
+    - update_downloadlogs()
+    - organize_URLsdata()
+    - update_descriptionPbar()
+    - download_file()
+    - download_files()
 """
 
 # Útiles de rutas.
@@ -85,3 +95,6 @@ from utilsdsp.utilsdsp_others import obtain_URLfromHTML, print_header, clear_out
 
 # Organizar los directorios.
 from utilsdsp.utilsdsp_organizedirs import move_files_to_root, move_files_to_subdir, organize_files_by_type, organize_files_by_name
+
+# Descargar ficheros desde internet.
+from utilsdsp.utilsdsp_downloads import validateURL, obtain_filename, rename_downloadfile, update_downloadlogs, organize_URLsdata, update_descriptionPbar, download_file, download_files
