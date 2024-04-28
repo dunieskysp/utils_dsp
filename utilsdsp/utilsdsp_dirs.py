@@ -77,14 +77,13 @@ def create_dir(path_src: str | object, parents: bool = True, print_msg: bool = F
         print(err)
 
 
-def create_downloadsdir(input_dir: str = "", in_PC: bool = False, mount_GDrive: bool = False, print_msg: bool = False) -> str:
+def create_downloadsdir(input_dir: str = "", mount_GDrive: bool = False, print_msg: bool = False) -> str:
     """
     Crear el directorio de descargas.
 
     Parameters:
     input_dir (str) [Opcional]: Directorio para guardar las descargas.
-    in_PC (bool) [Opcional]: Se está trabajando en la PC o no.
-    mount_GDrive (bool) [Opcional]: Está montado GDriver o no en Google Colab.
+    mount_GDrive (bool) [Opcional]: Está montado GDriver o no.
     print_msg (bool) [Opcional]: Imprimir mensaje al crear el directorio.
 
     Returns:
@@ -92,10 +91,10 @@ def create_downloadsdir(input_dir: str = "", in_PC: bool = False, mount_GDrive: 
     """
 
     # Obtener la ruta padre por defecto.
-    default_path = obtain_defaultpath(in_PC, mount_GDrive)
+    default_path = obtain_defaultpath(mount_GDrive)
 
     # Obtener la ruta para guardar las descargas.
-    downloads_path = obtain_downloadspath(input_dir, in_PC, mount_GDrive)
+    downloads_path = obtain_downloadspath(input_dir, mount_GDrive)
 
     # Crear el directorio de descargas.
     downloads_dir = create_dir(downloads_path, print_msg=print_msg)

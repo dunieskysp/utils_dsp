@@ -153,45 +153,43 @@ def join_path(*args: str, os_method: bool = False) -> str:
     return str(Path().joinpath(*args))
 
 
-def obtain_defaultpath(in_PC: bool = False, mount_GDrive: bool = False) -> str:
+def obtain_defaultpath(mount_GDrive: bool = False) -> str:
     """
     Obtener la ruta por defecto si se trabaja en la PC o en Google Colab.
 
     Parameters:
-    in_PC (bool) [Opcional]: Se está trabajando en la PC o no.
-    mount_GDrive (bool) [Opcional]: Está montado GDriver o no en Google Colab.
+    mount_GDrive (bool) [Opcional]: Está montado GDriver.
 
     Returns:
     str: Ruta por defecto absoluta.
     """
 
-    # Retornar la ruta por defecto de la PC.
-    if in_PC:
+    # Comprobar sí se está trabajando en Google Colab.
+    if os.getenv("COLAB_RELEASE_TAG"):
 
-        # Ruta actual.
-        current_path = obtain_currentpath()
+        # Retornar la ruta por defecto en Google Colab.
+        return "/content/drive/MyDrive" if mount_GDrive else "/content"
 
-        return join_path(current_path, "MyDrive") if mount_GDrive else current_path
+    # Retornar la ruta por defecto en la PC.
+    current_path = obtain_currentpath()
 
-    # Retornar la ruta por defecto en Google Colab.
-    return "/content/drive/MyDrive" if mount_GDrive else "/content"
+    return join_path(current_path, "MyDrive") if mount_GDrive else current_path
 
 
-def obtain_downloadspath(input_dir: str = "", in_PC: bool = False, mount_GDrive: bool = False) -> str:
+def obtain_downloadspath(input_dir: str = "", mount_GDrive: bool = False) -> str:
     """
-    # Obtener la ruta para guardar las descargas.
+    Obtener la ruta para guardar las descargas.
 
     Parameters:
     input_dir (str) [Opcional]: Directorio para guardar las Descargas.
-    in_PC (bool) [Opcional]: Se está trabajando en la PC o no.
-    mount_GDrive (bool) [Opcional]: Está montado GDriver o no en Google Colab.
+    mount_GDrive (bool) [Opcional]: Está montado GDriver.
 
     Returns:
     str: Ruta absoluta del directorio de descargas.
     """
 
     # Obtener la ruta padre por defecto.
-    default_path = obtain_defaultpath(in_PC, mount_GDrive)
+    default_path = obtain_defaultpath(mount_GDrive)
 
     # Sí no se introdujo ninguna ruta.
     if not input_dir:
