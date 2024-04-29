@@ -11,13 +11,13 @@ from outputstyles import warning, info, bold
 from utilsdsp import validate_path, select_contentdir, move_files, join_path, joinlist_to_dict, del_emptydirs
 
 
-def move_files_to_root(path_src: str | object, file_type: str = "", delete_empty: bool = False, overwrite: bool = False, print_msg: bool = True) -> None:
+def move_files_to_root(path_src: str | Path, file_type: str | None = None, delete_empty: bool = False, overwrite: bool = False, print_msg: bool = True) -> None:
     """
     Mover los ficheros hacía el directorio raíz.
 
     Parameters:
-    path_src (str | object Path): Ruta del directorio a organizar.
-    file_type (str) [Opcional]: Tipos de ficheros a seleccionar.
+    path_src (str | Path): Ruta del directorio a organizar.
+    file_type (str | None) [Opcional]: Tipos de ficheros a seleccionar.
     delete_empty (bool) [Opcional]: Eliminar las carpetas vacias.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
@@ -66,15 +66,15 @@ def move_files_to_root(path_src: str | object, file_type: str = "", delete_empty
         del_emptydirs(path_src, print_msg=print_msg)
 
 
-def move_files_to_subdir(path_src: str | object, subdir_name: str, file_type: str = "", overwrite: bool = False, print_msg: bool = True):
+def move_files_to_subdir(path_src: str | Path, subdir_name: str, file_type: str | None = None, overwrite: bool = False, print_msg: bool = True) -> None:
     """
     Crear un directorio dentro de los sub-directorios del nivel 1
     y mover los ficheros seleccionados dentro de él.
 
     Parameters:
-    path_src (str | object Path): Ruta del directorio raíz.
+    path_src (str | Path): Ruta del directorio raíz.
     subdir_name (str): Nombre del nuevo sub-directorio.
-    file_type (str) [Opcional]: Tipos de ficheros a seleccionar.
+    file_type (str | None) [Opcional]: Tipos de ficheros a seleccionar.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
 
@@ -121,14 +121,14 @@ def move_files_to_subdir(path_src: str | object, subdir_name: str, file_type: st
         print("")
 
 
-def organize_files_by_type(path_src: str | object, files_data: dict | list, path_dst: str | object = "", overwrite: bool = False, print_msg: bool = True) -> None:
+def organize_files_by_type(path_src: str | Path, files_data: dict | list, path_dst: str | Path | None = None, overwrite: bool = False, print_msg: bool = True) -> None:
     """
     Organizar los ficheros según su tipo en carpetas.
 
     Parameters:    
-    path_src (str | object Path): Ruta del directorio a organizar.
+    path_src (str | Path): Ruta del directorio a organizar.
     files_data (dict | list): Diccionario o lista con los tipos de ficheros y carpetas.
-    path_dst (str) | object Path [Opcional]: Ruta de destino.
+    path_dst (str | Path | None) [Opcional]: Ruta de destino.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
 
@@ -197,7 +197,7 @@ def organize_files_by_type(path_src: str | object, files_data: dict | list, path
         print("")
 
 
-def organize_files_by_name(path_src: str | object, path_dst: str | object = "", file_type: str = "", secondary: str = "", del_name: str = "", subdir: str = "", overwrite: str = False, print_msg: bool = True) -> None:
+def organize_files_by_name(path_src: str | Path, path_dst: str | Path | None = None, file_type: str | None = None, secondary: str | None = None, del_name: str | None = None, subdir: str | None = None, overwrite: str = False, print_msg: bool = True) -> None:
     """
     Organizar los ficheros según su nombre en carpetas.
     - Pueden existir ficheros principales y secundarios.
@@ -206,12 +206,12 @@ def organize_files_by_name(path_src: str | object, path_dst: str | object = "", 
     - Secundario: The Boys Episodio 1 - Series.com.html
 
     Parameters:    
-    path_src (str | object Path): Ruta del directorio a organizar.
-    path_dst (str) | object Path [Opcional]: Ruta de destino.
-    file_type (str) [Opcional]: Tipos de ficheros a tener en cuenta.
-    secondary (str) [Opcional]: Texto para identificar los secundarios (Episodio).
-    del_name (str) [Opcional]: Texto a eliminar del nombre de la carpeta ( - Series.com).
-    subdir (str) [Opcional]: Subdirectorio a crear dentro de las carpetas.
+    path_src (str | Path): Ruta del directorio a organizar.
+    path_dst (str | Path | None) [Opcional]: Ruta de destino.
+    file_type (str | None) [Opcional]: Tipos de ficheros a tener en cuenta.
+    secondary (str | None) [Opcional]: Texto para identificar los secundarios (Episodio).
+    del_name (str | None) [Opcional]: Texto a eliminar del nombre de la carpeta ( - Series.com).
+    subdir (str | None) [Opcional]: Subdirectorio a crear dentro de las carpetas.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
 
@@ -232,8 +232,13 @@ def organize_files_by_name(path_src: str | object, path_dst: str | object = "", 
 
     all_files = select_contentdir(path_src, file_type)
 
+    if not all_files:
+        return
+
     # Seleccionar los ficheros principales y secundarios.
-    files_secondary = [item for item in all_files if secondary in item.name]
+    files_secondary = [
+        item for item in all_files if secondary and secondary in item.name
+    ]
 
     files_main = [item for item in all_files if not item in files_secondary]
 
@@ -241,6 +246,7 @@ def organize_files_by_name(path_src: str | object, path_dst: str | object = "", 
     for file in files_main:
 
         # Obtener el nombre de la carpeta.
+        del_name = del_name if del_name else ""
         folder_name = file.stem.replace(del_name, "")
 
         # Ruta de la nueva carpeta.

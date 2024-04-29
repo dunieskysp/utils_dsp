@@ -38,7 +38,7 @@ def validateURL(url: str, accessible: bool = True, timeout: int | None = 10, str
     # Comprobar la estructura de la URL.
     if not validators.url(url):
         print(error("URL no válida:", "btn_ico"), info(url))
-        return
+        return False
 
     # Devolver "True" si no hay que comprobar la accesibilidad de la URL.
     if not accessible:
@@ -61,7 +61,7 @@ def validateURL(url: str, accessible: bool = True, timeout: int | None = 10, str
         print(error("No se pudo establecer conexión con:", "ico"), info(url))
         print(err)
 
-        return
+        return False
 
 
 def obtain_filename(response: requests.Response, url: str, missing_name: str | None = None) -> str:
@@ -94,12 +94,12 @@ def obtain_filename(response: requests.Response, url: str, missing_name: str | N
     return default_name
 
 
-def rename_downloadfile(path_src: str) -> str:
+def rename_downloadfile(path_src: str | Path) -> str:
     """
     Renombrar el archivo a descargar.
 
     Parameters:
-    path_src (str): Ruta del archivo.
+    path_src (str | Path): Ruta del archivo.
 
     Returns:
     str: Ruta del archivo renombrado
@@ -127,13 +127,17 @@ def rename_downloadfile(path_src: str) -> str:
     return str(path_new)
 
 
-def update_downloadlogs(write_logs: bool, logs_path: str, msg_type: str, url: str, filepath: str | None = None, err: str = None) -> None:
+def update_downloadlogs(write_logs: bool, logs_path: str | Path, msg_type: str, url: str, filepath: str | None = None, err: str | None = None) -> None:
     """
     Actualizar los logs de la descarga.
 
     Parameters:
-    write_logs (bool) [Opcional]: Guardar los logs.
-    logs_path (str) [Opcional]: Ruta del fichero de los logs.
+    write_logs (bool): Guardar los logs.
+    logs_path (str | Path): Ruta del fichero de los logs.
+    msg_type (str) [Opcional]: Tipo de mensaje a guardar.
+    url (str) [Opcional]: URL en turno.
+    filepath (str | None) [Opcional]: Ruta del archivo descargado.
+    err (str | None) [Opcional]: Mensaje de error de la excepción.
 
     Returns:
     None.

@@ -10,13 +10,13 @@ from outputstyles import error, info, warning
 from utilsdsp import validate_path, delete_dir
 
 
-def compress(path_src: str, path_dst: str = "", compress_type: str = "zip", base_include: bool = True, overwrite: bool = False, delete_src: bool = False) -> str:
+def compress(path_src: str | Path, path_dst: str | Path | None = None, compress_type: str = "zip", base_include: bool = True, overwrite: bool = False, delete_src: bool = False) -> str:
     """
     Comprimir un directorio o fichero.
 
     Parameters:
-    path_src (str): Ruta del directorio o fichero a comprimir.
-    path_dst (str) [Opcional]: Ruta donde guardar el fichero compactado.
+    path_src (str | Path): Ruta del directorio o fichero a comprimir.
+    path_dst (str | Path | None) [Opcional]: Ruta donde guardar el fichero compactado.
     compress_type (str) [Opcional]: Tipo de comprimido (zip, tar, gztar, bztar o xztar).
     base_include (bool) [Opcional]: Incluir el directorio base en el comprimido.
     overwrite (bool) [Opcional]: Sobrescribir el fichero comprimido sí existe.
@@ -66,27 +66,26 @@ def compress(path_src: str, path_dst: str = "", compress_type: str = "zip", base
                 root_dir=path_src
             )
 
+        # Eliminar el fichero o directorio de destino.
+        if delete_src:
+            delete_dir(path_src)
+
+        # Retornar la ruta absoluta del fichero comprimido.
+        return result
+
     except Exception as err:
 
         print(error("No se pudo comprimir:", "ico"), info(path_src))
         print(err)
-        return
-
-    # Eliminar el fichero o directorio de destino.
-    if delete_src:
-        delete_dir(path_src)
-
-    # Retornar la ruta absoluta del fichero comprimido.
-    return result
 
 
-def uncompress(path_src: str, path_dst: str = "", delete_src: bool = False) -> str:
+def uncompress(path_src: str | Path, path_dst: str | Path | None = None, delete_src: bool = False) -> str:
     """
     Descomprimir un fichero.
 
     Parameters:
-    path_src (str): Ruta del fichero comprimido.
-    path_dst (str) [Opcional]: Ruta a descomprimir el fichero.
+    path_src (str | Path): Ruta del fichero comprimido.
+    path_dst (str | Path | None) [Opcional]: Ruta a descomprimir el fichero.
     delete_src (bool) [Opcional]: Eliminar el fichero comprimido.
 
     Returns:
@@ -111,15 +110,14 @@ def uncompress(path_src: str, path_dst: str = "", delete_src: bool = False) -> s
 
         unpack_archive(path_src, path_dst)
 
+        # Eliminar el fichero comprimido de destino.
+        if delete_src:
+            delete_dir(path_src)
+
+        # Retornar la ruta absoluta del fichero comprimido.
+        return str(path_dst / path_src.stem)
+
     except Exception as err:
 
         print(error("No se pudo descomprimir:", "ico"), info(path_src))
         print(err)
-        return
-
-    # Eliminar el fichero comprimido de destino.
-    if delete_src:
-        delete_dir(path_src)
-
-    # Retornar la ruta absoluta del fichero comprimido.
-    return str(path_dst / path_src.stem)

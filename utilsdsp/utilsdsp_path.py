@@ -34,12 +34,12 @@ def obtain_currentpath(os_method: bool = False) -> str:
     return str(Path().absolute())
 
 
-def obtain_absolutepath(path_src: str, os_method: bool = False) -> str:
+def obtain_absolutepath(path_src: str | Path, os_method: bool = False) -> str:
     """
     Obtener la ruta absoluta (No necesariamente debe existir).
 
     Parameters:
-    path_src (str): Ruta relativa.
+    path_src (str | Path): Ruta relativa.
     os_method (bool) [Opcional]: Usar el paquete "os" y no "pathlib".
 
     Returns:
@@ -48,22 +48,25 @@ def obtain_absolutepath(path_src: str, os_method: bool = False) -> str:
 
     # Usando el módulo "os".
     if os_method:
-        return os.path.abspath(path_src)
+        return os.path.abspath(str(path_src))
 
     # Usando el módulo "pathlib".
     return str(Path(path_src).resolve())
 
 
-def change_currentpath(path_src: str) -> str:
+def change_currentpath(path_src: str | Path) -> str:
     """
     Cambiar la ruta actual (Debe existir la ruta).
 
     Parameters:
-    path_src (str): Nueva ruta a cambiar.
+    path_src (str | Path): Nueva ruta a cambiar.
 
     Returns:
     str: Nueva ruta cambiada.
     """
+
+    # Convertir a string si es un objeto Path.
+    path_src = str(path_src)
 
     # Comprobar que exista el directorio de origen.
     if not validate_path(path_src):
@@ -84,22 +87,18 @@ def change_currentpath(path_src: str) -> str:
 
         print(error("No existe el directorio:", "ico"), info(path_src))
 
-        return
-
     except Exception as err:
 
         print(error("Error al cambiar hacia la ruta:", "ico"), info(path_src))
         print(err)
 
-        return
 
-
-def validate_path(path_src: str, os_method: bool = False, print_msg: bool = True) -> bool:
+def validate_path(path_src: str | Path, os_method: bool = False, print_msg: bool = True) -> bool:
     """
     Válidar si la ruta existe.
 
     Parameters:
-    path (str): Ruta a comprobar su existencia.
+    path (str | Path): Ruta a comprobar su existencia.
     os_method (bool) [Opcional]: Usar el módulo "os" en vez de "pathlib".
     print_msg (bool) [Opcional]: Imprimir un mensaje si no existe la ruta.
 
@@ -107,10 +106,13 @@ def validate_path(path_src: str, os_method: bool = False, print_msg: bool = True
     bool: Booleano según la existencia de la Ruta.
     """
 
+    # Convertir a string si es un objeto Path.
+    path_src = str(path_src)
+
     # Comprobar que no este vacia la ruta.
     if not path_src:
         print(warning("Debe insertar una ruta.", "ico"))
-        return
+        return False
 
     # Construir rutas absolutas para evitar problemas con rutas relativas.
     path_src = obtain_absolutepath(path_src)
@@ -135,7 +137,7 @@ def join_path(*args: str, os_method: bool = False) -> str:
     Unir directorios en una sola ruta.
 
     Parameters:
-    args (list): Directorios a unir en una sola ruta.
+    args (list of str): Directorios a unir en una sola ruta.
     os_method (bool) [Opcional]: Usar el paquete "os" en vez de "pathlib".
 
     Returns:
@@ -158,7 +160,7 @@ def obtain_defaultpath(mount_GDrive: bool = False) -> str:
     Obtener la ruta por defecto si se trabaja en la PC o en Google Colab.
 
     Parameters:
-    mount_GDrive (bool) [Opcional]: Está montado GDriver.
+    mount_GDrive (bool) [Opcional]: Está montado GDriver o no.
 
     Returns:
     str: Ruta por defecto absoluta.
@@ -176,13 +178,13 @@ def obtain_defaultpath(mount_GDrive: bool = False) -> str:
     return join_path(current_path, "MyDrive") if mount_GDrive else current_path
 
 
-def obtain_downloadspath(input_dir: str = "", mount_GDrive: bool = False) -> str:
+def obtain_downloadspath(input_dir: str | None = None, mount_GDrive: bool = False) -> str:
     """
     Obtener la ruta para guardar las descargas.
 
     Parameters:
-    input_dir (str) [Opcional]: Directorio para guardar las Descargas.
-    mount_GDrive (bool) [Opcional]: Está montado GDriver.
+    input_dir (str | None) [Opcional]: Directorio para guardar las descargas.
+    mount_GDrive (bool) [Opcional]: Está montado GDriver o no.
 
     Returns:
     str: Ruta absoluta del directorio de descargas.
@@ -197,8 +199,8 @@ def obtain_downloadspath(input_dir: str = "", mount_GDrive: bool = False) -> str
         # Conformar una ruta por defecto para las descargas.
         return join_path(default_path, "Downloads")
 
-    # Sí la ruta por defecto está contenida en la introducida.
-    elif input_dir.startswith(default_path):
+    # Sí la ruta por defecto, está contenida en la introducida.
+    if input_dir.startswith(default_path):
 
         # Usar la misma ruta introducida.
         return input_dir

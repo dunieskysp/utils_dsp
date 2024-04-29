@@ -12,13 +12,14 @@ from outputstyles import error, info, warning
 from utilsdsp import validate_path
 
 
-def natural_size(size_file: int, unit: str = "") -> str:
+def natural_size(size_file: int, unit: str | None = None) -> str:
     """
-    Convertir los bytes a medidas más legibles.
+    Convertir los bytes a medidas más legibles (KB, MB, GB o TB).
 
     Parameters:
     size_file (int): Tamaño del fichero en bytes.
-    unit (str) [Opcional]: Unidad para dar el resulado (KB, MB, GB o TB).
+    unit (str | None) [Opcional]: Unidad para dar el resulado.
+    - KB, MB, GB o TB
 
     Returns:
     srt: Devuelve el tamaño del fichero en bytes, KB, MB, GB o TB.
@@ -64,13 +65,13 @@ def natural_size(size_file: int, unit: str = "") -> str:
     return f'{round(size, 2)} {unit.lower() if unit == "BYTES" else unit}'
 
 
-def obtain_sizedir(path_src: str | object, unit: str = "", file_type: str = "*") -> str:
+def obtain_sizedir(path_src: str | Path, unit: str | None = None, file_type: str = "*") -> str:
     """
     Obtener tamaño de un directorio con "Path().rglob()" y "Path().stat()".
 
     Parameters:
-    path_src (str | object Path): Ruta del directorio para determinar su tamaño.
-    unit (str) [Opcional]: Unidad para dar el resulado (KB, MB, GB o TB).
+    path_src (str | Path): Ruta del directorio para determinar su tamaño.
+    unit (str | None) [Opcional]: Unidad para dar el resulado (KB, MB, GB o TB).
     file_type (str) [Opcional]: Tipos de ficheros a seleccionar.
 
     Returns:
@@ -99,13 +100,13 @@ def obtain_sizedir(path_src: str | object, unit: str = "", file_type: str = "*")
     return natural_size(total_size, unit) if total_size else "0 bytes"
 
 
-def obtain_sizefile(path_src: str | object, unit: str = "", metod_stat: bool = False, metod_getsize: bool = False) -> str:
+def obtain_sizefile(path_src: str | Path, unit: str | None = None, metod_stat: bool = False, metod_getsize: bool = False) -> str:
     """
     Obtener tamaño de un fichero.
 
     Parameters:
-    path_src (str | object Path): Ruta del fichero a determinar su tamaño.
-    unit (str) [Opcional]: Unidad para dar el resulado (KB, MB, GB o TB).
+    path_src (str | Path): Ruta del fichero a determinar su tamaño.
+    unit (str | None) [Opcional]: Unidad para dar el resulado (KB, MB, GB o TB).
     metod_stat (bool) [Opcional]: Usar os.stat() para determinar el tamaño.
     metod_getsize (bool) [Opcional]: Usar os.path.getsize() para determinar el tamaño.
 
@@ -136,13 +137,13 @@ def obtain_sizefile(path_src: str | object, unit: str = "", metod_stat: bool = F
     return natural_size(path_src.stat().st_size, unit)
 
 
-def obtain_size(path_src: str, unit: str = "", file_type: str = "*") -> str:
+def obtain_size(path_src: str | Path, unit: str | None = None, file_type: str = "*") -> str:
     """
     Obtener tamaño de un fichero o directorio.
 
     Parameters:
-    path_src (str): Ruta del fichero o directorio a determinar su tamaño.
-    unit (str) [Opcional]: Unidad para dar el resulado (KB, MB, GB o TB).
+    path_src (str | Path): Ruta del fichero o directorio a determinar su tamaño.
+    unit (str | None) [Opcional]: Unidad para dar el resulado (KB, MB, GB o TB).
     file_type (str) [Opcional]: Tipos de ficheros a seleccionar.
 
     Returns:

@@ -9,16 +9,16 @@ from outputstyles import error, info, warning
 from utilsdsp import create_dir, validate_path
 
 
-def read_file(path_file: str | object, by_line: bool = True) -> list:
+def read_file(path_file: str | Path, by_line: bool = True) -> list | str:
     """
     Leer el contenido de un fichero.
 
     Parameters:
-    path_file (str | object Path): Ruta del fichero que se va a leer.
+    path_file (str | Path): Ruta del fichero a leer.
     by_line (bool) [Opcional]: Leer el contenido por lineas.
 
     Returns:
-    list: El contenido del fichero por líneas o un string.
+    list | str: El contenido por líneas o un string con todo.
     """
 
     # Comprobar que exista el fichero.
@@ -49,13 +49,13 @@ def read_file(path_file: str | object, by_line: bool = True) -> list:
         print(err)
 
 
-def write_file(path_file: str | list, content_write: str) -> str:
+def write_file(path_file: str | Path, content_write: str | list) -> str:
     """
     Escribir contenido dentro de un fichero.
 
     Parameters:
-    path_file (str): Ruta del fichero a escribir.
-    content_write (str): Contenido que se va a escribir (Texto o Lista).
+    path_file (str | Path): Ruta del fichero a escribir.
+    content_write (str | list): Contenido que se va a guardar.
 
     Returns:
     str: Ruta del fichero guardado.
@@ -71,7 +71,7 @@ def write_file(path_file: str | list, content_write: str) -> str:
 
     # Comprobar sí existe y no es un fichero.
     if path_file.exists() and not path_file.is_file():
-        print(warning("Ya existe y no es un fichero.", "ico"), info(path_file))
+        print(warning("Ya existe y no es un fichero:", "ico"), info(path_file))
         return
 
     # Crear sí no existe la ruta padre.

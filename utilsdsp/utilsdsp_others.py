@@ -13,13 +13,13 @@ from utilsdsp import validate_path, read_file
 from outputstyles import warning, error, info, bold
 
 
-def obtain_URLfromHTML(path_src: str | object, num_line: int = 3) -> str:
+def obtain_URLfromHTML(path_src: str | Path, num_line: int = 3) -> str:
     """
     Obtener la URL desde un fichero HTML, guardado con
     SingleFile (Extensión de Firefox).
 
     Parameters:
-    path_src (str | object Path): Ruta del fichero HTML.
+    path_src (str | Path): Ruta del fichero HTML.
     num_line (int): Número de la linea donde está la URL.
 
     Returns:
@@ -35,8 +35,10 @@ def obtain_URLfromHTML(path_src: str | object, num_line: int = 3) -> str:
 
     # Comprobar que sea un fichero HTML.
     if not path_src.suffix in [".html", ".HTML"]:
-        print(warning("Solo se aceptan ficheros HTML:", "ico"),
-              error(path_src, "ico"))
+        print(
+            warning("Solo se aceptan ficheros HTML:", "ico"),
+            error(path_src, "ico")
+        )
         return
 
     # Leer contenido del fichero HTML por lineas.
@@ -54,7 +56,7 @@ def obtain_URLfromHTML(path_src: str | object, num_line: int = 3) -> str:
     except Exception as err:
 
         print(error("No se pudo obtener la URL de:", "ico"), info(path_src))
-        # print(err)
+        print(err)
 
 
 def print_header(header: str, chars_cant: int = 100, decoration: str = "*", deco_init: int = 2) -> str:
@@ -122,15 +124,15 @@ def clear_output() -> None:
         print("\n" * 120)
 
 
-def calc_IMGdimensions(img_size: tuple, width_final: int = None, height_final: int = None) -> tuple:
+def calc_IMGdimensions(img_size: tuple, width_final: int | None = None, height_final: int | None = None) -> tuple:
     """
     Calcular las dimensiones finales (ancho, alto) de
     una imagen según su ancho o altura a modificar.
 
     Parameters:
     img_size (tuple): Tamaño original de la imagen (ancho, alto).
-    width_final (int) [Opcional]: Ancho a modificar.
-    height_final (int) [Opcional]: Alto a modificar.
+    width_final (int | None) [Opcional]: Ancho a modificar.
+    height_final (int | None) [Opcional]: Alto a modificar.
 
     Returns:
     tuple: Devuelve el ancho y alto de la imagen modificada.
@@ -158,7 +160,8 @@ def calc_IMGdimensions(img_size: tuple, width_final: int = None, height_final: i
 def optain_similarVars(var_name: str, var_cant: int, all_vars: dict, value: bool = True) -> list:
     """
     Obtener el valor de las varibles que tienen el nombre similar,
-    solo le cambia un número a cada una (Ej: var_1, var_2, etc).
+    solo le cambia un número a cada una.
+    - Ej: var_1, var_2, ..., var_10
 
     Parameters:
     var_name (str): Nombre común entre las varibles.
@@ -235,4 +238,6 @@ def joinlist_to_dict(key_list: list, value_list: list, data_to_str: bool = True)
 
     except Exception as err:
         print(error("No se pudo crear el diccionario desde las dos listas.", "ico"))
-        return
+        print(bold("Keys:"), key_list)
+        print(bold("Values:"), value_list)
+        print(err)

@@ -20,12 +20,12 @@ from utilsdsp import obtain_defaultpath, obtain_downloadspath, validate_path
 
 
 # NOTE: Crear directorios.
-def create_dir(path_src: str | object, parents: bool = True, print_msg: bool = False) -> str:
+def create_dir(path_src: str | Path, parents: bool = True, print_msg: bool = False) -> str:
     """
     Crear Directorio(s).
 
     Parameters:
-    path_src (str | object Path): Ruta del directorio(s) a crear.
+    path_src (str | Path): Ruta del directorio(s) a crear.
     parents (bool) [Opcional]: Crear o no la ruta padre si no existe.
     print_msg (bool) [Opcional]: Imprimir mensajes satisfactorios.
 
@@ -77,12 +77,12 @@ def create_dir(path_src: str | object, parents: bool = True, print_msg: bool = F
         print(err)
 
 
-def create_downloadsdir(input_dir: str = "", mount_GDrive: bool = False, print_msg: bool = False) -> str:
+def create_downloadsdir(input_dir: str | None = None, mount_GDrive: bool = False, print_msg: bool = False) -> str:
     """
     Crear el directorio de descargas.
 
     Parameters:
-    input_dir (str) [Opcional]: Directorio para guardar las descargas.
+    input_dir (str | None) [Opcional]: Directorio para guardar las descargas.
     mount_GDrive (bool) [Opcional]: Está montado GDriver o no.
     print_msg (bool) [Opcional]: Imprimir mensaje al crear el directorio.
 
@@ -115,13 +115,13 @@ def create_downloadsdir(input_dir: str = "", mount_GDrive: bool = False, print_m
     return downloads_dir
 
 
-def create_symboliclink(path_src: str, path_dst: str, delete_dst: bool = False) -> str:
+def create_symboliclink(path_src: str | Path, path_dst: str | Path, delete_dst: bool = False) -> str:
     """
     Crear enlace simbólico.
 
     Parameters:
-    path_src (str): Ruta del directorio o fichero original.
-    path_dst (str): Ruta del directorio a crear el enlace simbólico.
+    path_src (str | Path): Ruta del directorio o fichero original.
+    path_dst (str | Path): Ruta del directorio a crear el enlace simbólico.
     delete_dst (bool) [Opcional]: Borrar el destino sí existe.
 
     Returns:
@@ -139,7 +139,7 @@ def create_symboliclink(path_src: str, path_dst: str, delete_dst: bool = False) 
     # Ruta absoluta del enlace simbólico.
     path_symboliclink = path_dst / path_src.name
 
-    # Comprobar si existe el destino y no se puede borrar.
+    # Comprobar sí existe el destino y no se puede borrar.
     if path_symboliclink.exists() and not delete_dst:
 
         print(warning("Ya existe:", "ico"), info(path_symboliclink))
@@ -176,12 +176,12 @@ def create_symboliclink(path_src: str, path_dst: str, delete_dst: bool = False) 
 
 
 # NOTE: Eliminar directorios.
-def delete_dir(path_src: str | object, print_msg: bool = True) -> bool:
+def delete_dir(path_src: str | Path, print_msg: bool = True) -> bool:
     """
     Eliminar un directorio o fichero.
 
     Parameters:
-    path_src (str | object Path): Ruta del directorio o fichero a eliminar.
+    path_src (str | Path): Ruta del directorio o fichero a eliminar.
     print_msg (bool) [Opcional]: Imprimir mensaje de error.
 
     Returns:
@@ -190,7 +190,7 @@ def delete_dir(path_src: str | object, print_msg: bool = True) -> bool:
 
     # Comprobar que exista el directorio o fichero.
     if not validate_path(path_src):
-        return
+        return False
 
     # Construir rutas absolutas para evitar problemas con rutas relativas.
     path_src = Path(path_src).resolve()
@@ -222,15 +222,15 @@ def delete_dir(path_src: str | object, print_msg: bool = True) -> bool:
         print(error("Error al eliminar:", "btn_ico"), info(path_src))
         print(err)
 
-    return
+    return False
 
 
-def del_emptydirs(path_src: str | object, print_msg: bool = True) -> None:
+def del_emptydirs(path_src: str | Path, print_msg: bool = True) -> None:
     """
     Borrar recursivamente los sub-directorios vacios.
 
     Parameters:
-    path_scan (str | object Path): Ruta del directorio raíz.
+    path_scan (str | Path): Ruta del directorio raíz.
     print_msg (bool) [Opcional]: Imprimir mensaje satisfactorio.
 
     Returns:
@@ -247,7 +247,7 @@ def del_emptydirs(path_src: str | object, print_msg: bool = True) -> None:
     # Obtener todos los subdirectorios.
     all_subdirs = [item for item in path_src.rglob("*") if item.is_dir()]
 
-    # Ordenar reversamente la lista
+    # Ordenar reversamente la lista.
     all_subdirs.sort(reverse=True)
 
     # Borrar todos los subdirectorios vacios
@@ -271,13 +271,13 @@ def del_emptydirs(path_src: str | object, print_msg: bool = True) -> None:
 
 
 # NOTE: Seleccionar ficheros y subdirectorios dentro de un directorio.
-def select_contentdir(path_src: str | object, file_type: str = "", recursive: bool = False, print_msg: bool = True) -> list:
+def select_contentdir(path_src: str | Path, file_type: str | None = None, recursive: bool = False, print_msg: bool = True) -> list:
     """
     Seleccionar todo el contenido de en un directorio.
 
     Parameters:
-    path_src (str | object Path): Ruta del directorio raíz.
-    file_type (str) [Opcional]: Tipos de ficheros a seleccionar.
+    path_src (str | Path): Ruta del directorio raíz.
+    file_type (str | None) [Opcional]: Tipos de ficheros a seleccionar.
     recursive (bool) [Opcional]: Buscar en los sub-directorios.
     print_msg (bool) [Opcional]: Imprimir mensaje sí no hay ficheros.
 
@@ -318,16 +318,16 @@ def select_contentdir(path_src: str | object, file_type: str = "", recursive: bo
 
 
 # NOTE: Mover, copiar y renombrar.
-def prepare_paths(path_src: str | object, path_dst: str | object, overwrite: bool, metod_rename: bool = False, new_name: str = "") -> tuple:
+def prepare_paths(path_src: str | Path, path_dst: str | Path, overwrite: bool, metod_rename: bool = False, new_name: str | None = None) -> tuple:
     """
     Preparar las rutas para mover, copiar y renombrar directorios.
 
     Parameters:
-    path_src (str | object Path): Ruta del fichero o directorio de origen.
-    path_dst (str | object Path): Ruta del directorio de destino.
+    path_src (str | Path): Ruta del fichero o directorio de origen.
+    path_dst (str | Path): Ruta del directorio de destino.
     overwrite (bool): Sobrescribir el destino sí existe.
     metod_rename (bool) [Opcional]: Método renombrar.
-    new_name (str) [Opcional]: Nuevo nombre sí es método renombrar.
+    new_name (str | None) [Opcional]: Nuevo nombre sí es el método renombrar.
 
     Returns:
     tuple: Ruta de origen (path_src), destino (path_dst),
@@ -369,13 +369,13 @@ def prepare_paths(path_src: str | object, path_dst: str | object, overwrite: boo
     return path_src, path_dst, path_dst_final, msg
 
 
-def move_dir(path_src: str | object, path_dst: str | object, print_msg: bool = False, overwrite: bool = False) -> str:
+def move_dir(path_src: str | Path, path_dst: str | Path, print_msg: bool = False, overwrite: bool = False) -> str:
     """
     Mover un fichero o directorio.
 
     Parameters:
-    path_src (str | object Path): Ruta del fichero o directorio a mover.
-    path_dst (str) | object Path: Ruta del directorio al que se va a mover.
+    path_src (str | Path): Ruta del fichero o directorio a mover.
+    path_dst (str) | Path: Ruta del directorio al que se va a mover.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
 
@@ -408,13 +408,13 @@ def move_dir(path_src: str | object, path_dst: str | object, print_msg: bool = F
         print(err)
 
 
-def move_files(files: list, path_dst: str | object, print_msg: bool = False, overwrite: bool = False, file_type: str = "*") -> None:
+def move_files(files: list, path_dst: str | Path, print_msg: bool = False, overwrite: bool = False, file_type: str = "*") -> None:
     """
     Mover una lista de ficheros o directorios.
 
     Parameters:
-    files (list): Lista con las rutas (str | object Path) a mover.
-    path_dst (str) | object Path: Ruta del directorio al que se va a mover.
+    files (list): Lista con las rutas (str | Path) a mover.
+    path_dst (str) | Path: Ruta del directorio al que se va a mover.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
     file_type (srt) [Opcional]: Tipo de ficheros a mover.
@@ -444,13 +444,13 @@ def move_files(files: list, path_dst: str | object, print_msg: bool = False, ove
         print(err)
 
 
-def copy_dir(path_src: str | object, path_dst: str | object, print_msg: bool = False, overwrite: bool = False) -> str:
+def copy_dir(path_src: str | Path, path_dst: str | Path, print_msg: bool = False, overwrite: bool = False) -> str:
     """
     Copiar un fichero o directorio.
 
     Parameters:
-    path_src (str | object Path): Ruta del fichero o directorio a copiar.
-    path_dst (str | object Path): Ruta del directorio al que se va a copiar.
+    path_src (str | Path): Ruta del fichero o directorio a copiar.
+    path_dst (str | Path): Ruta del directorio al que se va a copiar.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
 
@@ -491,14 +491,14 @@ def copy_dir(path_src: str | object, path_dst: str | object, print_msg: bool = F
         print(err)
 
 
-def rename_dir(path_src: str | object, new_name: str, path_dst: str | object = "",  print_msg: bool = False, overwrite: bool = False) -> str:
+def rename_dir(path_src: str | Path, new_name: str, path_dst: str | Path | None = None,  print_msg: bool = False, overwrite: bool = False) -> str:
     """
     Renombrar y/o mover un fichero y directorio.
 
     Parameters:
     path_src (str | object Path): Ruta del fichero o directorio a renombrar.
     new_name (str): Nuevo nombre del fichero o directorio a renombrar.
-    path_dst (str | object Path) [Opcional]: Ruta de destino fichero o directorio renombrado.
+    path_dst (str | Path | None) [Opcional]: Ruta de destino.
     print_msg (bool) [Opcional]: Imprimir un mensaje satisfactorio.
     overwrite (bool) [Opcional]: Sobrescribir el destino sí existe.
 
