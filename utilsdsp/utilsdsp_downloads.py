@@ -186,10 +186,10 @@ def organize_URLsdata(urls_data: list, path_dst: str) -> list:
     path_dst (str) [Opcional]: Directorio para guardar las descargas.
 
     Returns:
-    list: Lista de tuplas con (URL, Filename, Path_Folder, pbar_pos).
+    list: Lista de tuplas con (URL, Filename, Path_Folder).
     """
 
-    list_result = []
+    result = []
 
     # Organizar por tuplas los datos de las URLs.
     for data in urls_data:
@@ -201,32 +201,19 @@ def organize_URLsdata(urls_data: list, path_dst: str) -> list:
         if not data_segments[0] or len(data_segments) > 3:
             continue
 
-        # Conformar las tuplas según los datos (URL, Filename, Folder).
-        if len(data_segments) == 1:
-            url_data = (
-                data_segments[0],
-                "",
-                path_dst
-            )
-
-        if len(data_segments) == 2:
-            url_data = (
-                data_segments[0],
-                data_segments[1].strip(),
-                path_dst
-            )
-
-        if len(data_segments) == 3:
-            url_data = (
-                data_segments[0],
-                data_segments[1].strip(),
-                join_path(path_dst, data_segments[2].strip())
-            )
+        # Obtener los datos (URL, Filename, Folder).
+        url = data_segments[0]
+        name = data_segments[1] if len(data_segments) >= 2 else ""
+        folder = data_segments[2] if len(data_segments) == 3 else ""
 
         # Agregar los datos a la lista resultante.
-        list_result.append(url_data)
+        result.append((
+            url.strip(),
+            name.strip(),
+            join_path(path_dst, folder)
+        ))
 
-    return list_result
+    return result
 
 
 def update_descriptionPbar(result: str, status: dict) -> tuple:

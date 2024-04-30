@@ -145,7 +145,7 @@ def join_path(*args: str, os_method: bool = False) -> str:
     """
 
     # Seleccionar solo los argumentos de tipo "string".
-    args = (arg for arg in args if isinstance(arg, str))
+    args = (arg.strip() for arg in args if isinstance(arg, str))
 
     # Usando el paquete "os".
     if os_method:
