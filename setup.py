@@ -17,6 +17,9 @@ setup(
     packages=find_packages(),
     install_requires=[
         "outputstyles==1.0.0",
+        "validators==0.28.1",
+        "requests==2.31.0",
+        "tqdm==4.66.2"
     ],
     keywords=['python', 'utilsdsp'],
     classifiers=[
