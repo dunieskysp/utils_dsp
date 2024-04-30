@@ -42,7 +42,7 @@ def natural_size(size_file: int, unit: str | None = None) -> str:
     }
 
     # Poner en mayúscula la unidad del argumento.
-    unit = unit.upper()
+    unit = unit.upper() if unit and isinstance(unit, str) else ""
 
     # Si la unidad introducida es válida.
     if unit in units:
