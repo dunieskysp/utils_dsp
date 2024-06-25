@@ -177,13 +177,14 @@ def update_downloadlogs(write_logs: bool, logs_path: str | Path, msg_type: str, 
             pass
 
 
-def organize_URLsdata(urls_data: list, path_dst: str) -> list:
+def organize_URLsdata(urls_data: list, path_dst: str, separation: str) -> list:
     """
     Organizar los datos de las URLs a descargar.
 
     Parameters:
     urls_data (list): Lista con las URLs, nombres y carpetas separados por coma.
     path_dst (str) [Opcional]: Directorio para guardar las descargas.
+    separation (str) [Opcional]: Caracter que separa los datos en una linea
 
     Returns:
     list: Lista de tuplas con (URL, Filename, Path_Folder).
@@ -195,7 +196,7 @@ def organize_URLsdata(urls_data: list, path_dst: str) -> list:
     for data in urls_data:
 
         # Segmentar los datos.
-        data_segments = data.split(",")
+        data_segments = data.split(separation)
 
         # Comprobar que tenga URL y solo 3 datos.
         if not data_segments[0] or len(data_segments) > 3:
@@ -398,21 +399,22 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
         return "down_error"
 
 
-def download_files(urls: list, path_dst: str | None = None, max_workers: int = 1, overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int = 1, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour_main: str | None = None, colour: str | None = None, desc_len: int | None = None, print_msg: bool = False) -> str | None:
+def download_files(urls_data: list, path_dst: str | None = None, max_workers: int = 1, separation: str = ",", overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int = 1, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour_main: str | None = None, colour: str | None = None, desc_len: int | None = None, print_msg: bool = False) -> str | None:
     """
     Descargar multiples archivos simultaneos desde internet.
     - Recive una lista de URL, nombre del archivo y carpeta
     donde se va a guardar, todo seperado por comas.
 
-    Ej: urls = [
+    Ej: urls_data = [
         "https://dominio.com/fichero.txt, Nuevo nombre.txt, Carpeta de textos",
         "https://dominio.com/imagen.jpg, Foto.jpg, Carpeta de imagenes",
     ]
 
     Parameters:
-    urls (list): Lista con las URLs, nombres y carpetas separados por coma.
+    urls_data (list): Lista con las URLs, nombres y carpetas separados por coma.
     path_dst (str) [Opcional]: Directorio para guardar las descargas.
     max_workers (int) [Opcional]: Cantidad de descargas simultaneas.
+    separation (str) [Opcional]: Caracter que separa los datos de "urls_data"
 
     overwrite (bool) [Opcional]: Sobrescribir el archivo sí existe.
     rename (bool) [Opcional]: Renombrar el archivo sí existe.
@@ -440,7 +442,7 @@ def download_files(urls: list, path_dst: str | None = None, max_workers: int = 1
 
     # Organizar los datos de las URLs.
     path_dst = obtain_downloadspath(path_dst)
-    urls_data = organize_URLsdata(urls, path_dst)
+    urls_data = organize_URLsdata(urls_data, path_dst, separation)
 
     # Definir la barra de progreso.
     progress_bar = tqdm(
