@@ -54,15 +54,17 @@ Organizar los directorios.
     - organize_files_by_type()
     - organize_files_by_name()
 
-Descargar ficheros desde internet.
-    - validateURL()
-    - obtain_filename()
-    - rename_downloadfile()
-    - update_downloadlogs()
-    - organize_URLsdata()
-    - update_descriptionPbar()
-    - download_file()
-    - download_files()
+Descargar un archivo desde internet:
+    - validate_and_resquest: Comprobar sí una URL es válida y accesible
+    - obtain_filename: Obtener nombre del archivo que se va a descargar
+    - rename_download_file: Renombrar el archivo a descargar
+    - update_download_logs: Actualizar los logs de la descarga
+    - download_file: Descargar un archivo desde internet
+
+Descargar varios archivos desde internet
+    - organize_urls_data: Organizar en tuplas los datos de las URLs a descargar
+    - update_description_pbar: Actualizar descripción de la barra de progreso principal
+    - download_files: Descargar multiples archivos simultaneos desde internet
 """
 
 # Útiles de rutas.
@@ -97,4 +99,4 @@ from utilsdsp.utilsdsp_others import obtain_URLfromHTML, print_header, clear_out
 from utilsdsp.utilsdsp_organizedirs import move_files_to_root, move_files_to_subdir, organize_files_by_type, organize_files_by_name
 
 # Descargar ficheros desde internet.
-from utilsdsp.utilsdsp_downloads import validateURL, obtain_filename, rename_downloadfile, update_downloadlogs, organize_URLsdata, update_descriptionPbar, download_file, download_files
+from utilsdsp.utilsdsp_downloads import validate_and_resquest, obtain_filename, rename_download_file, update_download_logs, download_file, organize_urls_data, update_description_pbar, download_files
