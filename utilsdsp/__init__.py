@@ -68,6 +68,9 @@ Descargar varios archivos desde internet:
 
 Operaciones con listas:
     - remove_repeated_elements: Eliminar elementos repetidos
+
+Operaciones con Diccionarios:
+    - join_list_to_dict: Unir dos listas en un diccionario
 """
 
 # Útiles de rutas
@@ -104,5 +107,8 @@ from utilsdsp.utilsdsp_organizedirs import move_files_to_root, move_files_to_sub
 # Descargar ficheros desde internet
 from utilsdsp.utilsdsp_downloads import validate_and_resquest, obtain_filename, rename_download_file, update_download_logs, download_file, organize_urls_data, update_description_pbar, download_files
 
-# Utiles de las listas
+# Utiles de las Listas
 from utilsdsp.utilsdsp_list import remove_repeated_elements
+
+# Utiles de los Diccionarios
+from utilsdsp.utilsdsp_dict import join_list_to_dict
