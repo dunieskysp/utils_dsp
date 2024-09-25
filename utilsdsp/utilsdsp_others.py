@@ -1,40 +1,42 @@
 """
-Oras funciones útiles.
-    - obtain_URLfromHTML()
-    - print_header()
-    - clear_output()
-    - calc_IMGdimensions()
-    - optain_similarVars()
+Otras funciones útiles:
+    - obtain_url_from_html: Obtener la URL desde un fichero HTML
+    - create_headers_decorates: Crear un encabezado decorado
+    - clear_output: Limpiar salida en la Terminal según el SO
+    - calc_img_dimensions: Calcular las dimensiones de una imagen
+    - obtain_similar_vars: Obtener el valor o nombre de variables similares
 """
 
 import os
 from pathlib import Path
 from utilsdsp import validate_path, read_file
-from outputstyles import warning, error, info, bold
+from outputstyles import warning, error, info, bold, add_text_styles
 
 
-def obtain_URLfromHTML(path_src: str | Path, num_line: int = 3) -> str:
+def obtain_url_from_html(path_src: str | Path, num_line: int = 3) -> str | None:
     """
-    Obtener la URL desde un fichero HTML, guardado con
-    SingleFile (Extensión de Firefox).
+    Obtener la URL desde un fichero HTML, guardado
+    con SingleFile (Extensión de Firefox)
 
     Parameters:
-    path_src (str | Path): Ruta del fichero HTML.
-    num_line (int): Número de la linea donde está la URL.
+    path_src (str | Path): Ruta del fichero HTML
+    num_line (int): Número de la linea donde está la URL
 
     Returns:
-    str: URL real del fichero HTML.
+    str: URL real del fichero HTML
+    None: Si no se obtuvo la URL o no es un fichero HTML
     """
 
-    # Comprobar que exista el fichero HTML.
+    # Comprobar que exista el fichero HTML
     if not validate_path(path_src):
         return
 
-    # Construir rutas absolutas para evitar problemas con rutas relativas.
+    # Construir rutas absolutas para evitar problemas con rutas relativas
     path_src = Path(path_src).resolve()
 
-    # Comprobar que sea un fichero HTML.
-    if not path_src.suffix in [".html", ".HTML"]:
+    # Comprobar que sea un fichero HTML
+    if path_src.suffix.lower() != ".html":
+
         print(
             warning("Solo se aceptan ficheros HTML:", "ico"),
             error(path_src, "ico")
@@ -59,41 +61,49 @@ def obtain_URLfromHTML(path_src: str | Path, num_line: int = 3) -> str:
         print(err)
 
 
-def print_header(header: str, chars_cant: int = 100, decoration: str = "*", deco_init: int = 2) -> str:
+def create_headers_decorates(header: str, chars_cant: int = 100, decoration: str = "*", deco_init: int = 2, styles: list | None = None) -> str:
     """
-    Imprimir encabezados decorados.
+    Crear un encabezado decorado
 
     Parameters:
-    header (str): Texto del encabezado.
-    chars_cant (int) [Opcional]: Cantidad de carácteres del encabezado.
-    decoration (str) [Opcional]: Decorado del encabezado.
-    deco_init (int) [Opcional]: Cantidad de decorado inicial.
+    header (str): Texto del encabezado
+    chars_cant (int): Cantidad de carácteres del encabezado
+    decoration (str): Decorado del encabezado
+    deco_init (int): Cantidad de decorado inicial
+    styles (list | None): Lista con los estilos a aplicarle al header
+
+    Ej (Los mismos estilos del paquete outputstyles):
+        - styles = ["fg_red", "bold"]
 
     Returns:
-    str: Encabezado decorado y con la longitud especificada.
+    str: Encabezado decorado y con la longitud especificada
     """
 
     try:
 
-        # Sanear argumentos.
+        # Sanear argumentos
         header = str(header)
         chars_cant = int(chars_cant)
         decoration = str(decoration)
         deco_init = int(deco_init)
 
-        # Verificar que la cantidad de decoración inicial sea positiva.
-        deco_init = (deco_init) if deco_init >= 0 else 1
+        # Cantidad de decoración inicial
+        deco_init = deco_init if deco_init >= 0 else 1
 
-        # Cantidad de decoración al final del encabezado.
-        deco_final = chars_cant - len(header) - deco_init
-
-        # Decoración inicial con el texto del header.
+        # Encabezado inicial decorado y con el texto del header
         header_init = f'{header} ' if deco_init == 0 else f'{decoration * deco_init} {header} '
 
-        # Cantidad de decoración al final.
+        # Cantidad de decoración al final del encabezado
+        deco_final = chars_cant - len(header_init)
+
+        # Encabezado final decorado
         header_final = decoration * deco_final if deco_final > 0 else decoration * deco_init
 
-        return header_init + header_final
+        # Verificar que los estilos a aplicar sean válidos
+        styles = styles if isinstance(styles, list) and styles else []
+
+        # Retornar el encabezado decorado
+        return add_text_styles(header_init + header_final, styles=styles)
 
     except Exception as err:
 
@@ -102,16 +112,16 @@ def print_header(header: str, chars_cant: int = 100, decoration: str = "*", deco
 
 def clear_output() -> None:
     """
-    Limpiar CLI según el SO.
+    Limpiar salida en la Terminal según el SO
 
     Parameters:
-    None.
+    None
 
     Returns:
-    None.
+    None
     """
 
-    # Si es Windows.
+    # Si es Windows
     if os.name == "nt":
         os.system("cls")
 
@@ -124,27 +134,27 @@ def clear_output() -> None:
         print("\n" * 120)
 
 
-def calc_IMGdimensions(img_size: tuple, width_final: int | None = None, height_final: int | None = None) -> tuple:
+def calc_img_dimensions(img_size: tuple, width_final: int | None = None, height_final: int | None = None) -> tuple:
     """
     Calcular las dimensiones finales (ancho, alto) de
-    una imagen según su ancho o altura a modificar.
+    una imagen según su ancho o altura a modificar
 
     Parameters:
-    img_size (tuple): Tamaño original de la imagen (ancho, alto).
-    width_final (int | None) [Opcional]: Ancho a modificar.
-    height_final (int | None) [Opcional]: Alto a modificar.
+    img_size (tuple): Tamaño original de la imagen (ancho, alto)
+    width_final (int | None): Ancho a modificar
+    height_final (int | None): Alto a modificar
 
     Returns:
-    tuple: Devuelve el ancho y alto de la imagen modificada.
+    tuple: Devuelve el ancho y alto de la imagen modificada
     """
 
-    # Calcular la altura final si se introdujo un ancho.
+    # Calcular la altura final si se introdujo un ancho
     if width_final and isinstance(width_final, int):
 
         # Fórmula: height_final = width_final / width_org * height_org
         height_final = round(width_final / int(img_size[0]) * int(img_size[1]))
 
-    # Calcular el Ancho final si se introdujo una altura.
+    # Calcular el Ancho final si se introdujo una altura
     elif height_final and isinstance(height_final, int):
 
         # Fórmula: width_final = height_final / height_org * width_org
@@ -157,87 +167,35 @@ def calc_IMGdimensions(img_size: tuple, width_final: int | None = None, height_f
     return width_final, height_final
 
 
-def optain_similarVars(var_name: str, var_cant: int, all_vars: dict, value: bool = True) -> list:
+def obtain_similar_vars(var_name: str, var_cant: int, all_vars: dict, value: bool = True) -> list:
     """
-    Obtener el valor de las varibles que tienen el nombre similar,
-    solo le cambia un número a cada una.
+    Obtener el valor de las variables que tienen el nombre similar,
+    solo le cambia un número a cada una
     - Ej: var_1, var_2, ..., var_10
 
     Parameters:
-    var_name (str): Nombre común entre las varibles.
-    var_cant (int): Cantidad de variables que hay similares.
-    all_vars (dict): Diccionario con todas las variables [globals() o locals()].
-    value (bool) [Opcional]: Obtener el valor de las variables o el nombre.
+    var_name (str): Nombre común entre las varibles
+    var_cant (int): Cantidad de variables que hay similares
+    all_vars (dict): Diccionario con todas las variables [globals() o locals()]
+    value (bool): Obtener el valor de las variables o el nombre
 
     Returns:
-    list: Valores no núlos de las variables en una lista.
+    list: Valor o nombre de las variables no nulas
     """
 
     try:
 
+        # Retornar el valor de las variables
         if value:
 
-            result = [
+            return [
                 all_vars[f'{var_name}{i}'] for i in range(1, var_cant + 1) if all_vars[f'{var_name}{i}']
             ]
 
-        else:
-
-            result = [
-                f'{var_name}{i}' for i in range(1, var_cant + 1) if all_vars[f'{var_name}{i}']
-            ]
-
-        return result
+        # Retornar el nombre de las variables
+        return [
+            f'{var_name}{i}' for i in range(1, var_cant + 1) if all_vars[f'{var_name}{i}']
+        ]
 
     except Exception as err:
         print(error("Error al obtener la variable:", "ico"), err)
-
-
-def joinlist_to_dict(key_list: list, value_list: list, data_to_str: bool = True) -> dict:
-    """
-    Unir dos listas en un diccionario.
-
-    Parameters:    
-    key_list (list): Lista con las llaves.
-    value_list (list): Lista con los valores.
-    data_to_str (bool) [Opcional]: Convertir los datos a string.
-
-    Ej (Deben tener la misma longitud):
-    - key_list = ["txt", "jpg"]
-    - value_list = ["Textos", "Imagenes"]
-
-    Returns:
-    dict: Discionario con las llaves y valores asociados.
-    """
-
-    def __liststr(data_list: list) -> list:
-        """
-        Convertir los datos de una lista a string.
-        """
-
-        return [str(item) for item in data_list]
-
-    # Comprobar que se correspondan las longitudes.
-    if len(key_list) != len(value_list):
-
-        print(warning("Las longitudes no se corresponden:", "ico"))
-        print(bold("Keys:"), key_list)
-        print(bold("Values:"), value_list)
-
-        return
-
-    # Convertir los datos a string.
-    if data_to_str:
-
-        key_list = __liststr(key_list)
-        value_list = __liststr(value_list)
-
-    # Relacionar las dos listas en un diccionario.
-    try:
-        return {ext: folder for ext, folder in zip(key_list, value_list)}
-
-    except Exception as err:
-        print(error("No se pudo crear el diccionario desde las dos listas.", "ico"))
-        print(bold("Keys:"), key_list)
-        print(bold("Values:"), value_list)
-        print(err)

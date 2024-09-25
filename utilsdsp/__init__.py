@@ -40,13 +40,12 @@ Comprimir ficheros y directorios.
     - compress()
     - uncompress()
 
-Oras funciones útiles.
-    - obtain_URLfromHTML()
-    - print_header()
-    - clear_output()
-    - calc_IMGdimensions()
-    - optain_similarVars()
-    - joinlist_to_dict()
+Otras funciones útiles:
+    - obtain_url_from_html: Obtener la URL desde un fichero HTML
+    - create_headers_decorates: Crear un encabezado decorado
+    - clear_output: Limpiar salida en la Terminal según el SO
+    - calc_img_dimensions: Calcular las dimensiones de una imagen
+    - obtain_similar_vars: Obtener el valor o nombre de variables similares
 
 Organizar los directorios.
     - move_files_to_root()
@@ -71,38 +70,38 @@ Operaciones con listas:
     - remove_repeated_elements: Eliminar elementos repetidos
 """
 
-# Útiles de rutas.
+# Útiles de rutas
 from utilsdsp.utilsdsp_path import obtain_currentpath, obtain_absolutepath, change_currentpath, validate_path, join_path, obtain_defaultpath, obtain_downloadspath
 
 
-# Útiles de directorios.
+# Útiles de directorios
 from utilsdsp.utilsdsp_dirs import create_dir, create_downloadsdir, create_symboliclink, delete_dir, del_emptydirs, select_contentdir, move_dir, move_files, copy_dir, rename_dir
 
 
-# Útiles de ficheros.
+# Útiles de ficheros
 from utilsdsp.utilsdsp_files import read_file, write_file
 
 
-# Útiles de seneamiento de nombres de ficheros.
+# Útiles de seneamiento de nombres de ficheros
 from utilsdsp.utilsdsp_sanitize import sanitize_filename
 
 
-# Obtener tamaño de ficheros y directorios.
+# Obtener tamaño de ficheros y directorios
 from utilsdsp.utilsdsp_sizefile import natural_size, obtain_sizedir, obtain_sizefile, obtain_size
 
 
-# Comprimir ficheros y directorios.
+# Comprimir ficheros y directorios
 from utilsdsp.utilsdsp_compress import compress, uncompress
 
 
-# Otras funciones útiles.
-from utilsdsp.utilsdsp_others import obtain_URLfromHTML, print_header, clear_output, calc_IMGdimensions, optain_similarVars, joinlist_to_dict
+# Otras funciones útiles
+from utilsdsp.utilsdsp_others import obtain_url_from_html, create_headers_decorates, clear_output, calc_img_dimensions, obtain_similar_vars
 
 
-# Organizar los directorios.
+# Organizar los directorios
 from utilsdsp.utilsdsp_organizedirs import move_files_to_root, move_files_to_subdir, organize_files_by_type, organize_files_by_name
 
-# Descargar ficheros desde internet.
+# Descargar ficheros desde internet
 from utilsdsp.utilsdsp_downloads import validate_and_resquest, obtain_filename, rename_download_file, update_download_logs, download_file, organize_urls_data, update_description_pbar, download_files
 
 # Utiles de las listas
