@@ -1,14 +1,13 @@
 """
 Descargar un archivo desde internet:
     - validate_and_resquest: Comprobar sí una URL es válida y accesible
-    - obtain_filename: Obtener nombre del archivo que se va a descargar
-    - rename_download_file: Renombrar el archivo a descargar
-    - update_download_logs: Actualizar los logs de la descarga
+    - __obtain_filename: Obtener nombre del archivo que se va a descargar
+    - __update_download_logs: Actualizar los logs de la descarga
     - download_file: Descargar un archivo desde internet
 
 Descargar varios archivos desde internet
-    - organize_urls_data: Organizar en tuplas los datos de las URLs a descargar
-    - update_description_pbar: Actualizar descripción de la barra de progreso principal
+    - __organize_urls_data: Organizar en tuplas los datos de las URLs a descargar
+    - __update_description_pbar: Actualizar descripción de la barra de progreso principal
     - download_files: Descargar multiples archivos simultaneos desde internet
 """
 
@@ -19,7 +18,7 @@ from tqdm.auto import tqdm
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from outputstyles import error, warning, info, success, bold
-from utilsdsp import sanitize_filename, create_downloadsdir, natural_size, join_path, validate_path, write_file, obtain_downloadspath
+from utilsdsp import sanitize_filename, create_downloads_dir, natural_size, join_path, validate_path, write_text_file, obtain_downloads_path, rename_exists_file
 
 
 # COMMENT Funciones para descargar un archivo
@@ -32,8 +31,8 @@ def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None
     accessible (bool): Verificar sí es accesible
     timeout (int | None): Tiempo de espera por la respuesta del servidor
     stream (bool): No descargar la respuesta completa en memoria
-    headers (dict | None): Datos del Headers de la petición Get
-    cookies (dict | None): Datos de las cookies de la petición Get
+    headers (dict | None): Datos del Headers para la petición Get
+    cookies (dict | None): Datos de las cookies para la petición Get
     auth (dict | None): Credenciales de autenticación
 
     write_logs (bool): Guardar los logs
@@ -51,10 +50,11 @@ def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None
     if not validators.url(url):
 
         if print_msg:
+
             print(error("URL no válida:", "btn_ico"), info(url))
 
-        # Atualizar los logs.
-        update_download_logs(
+        # Atualizar los logs
+        __update_download_logs(
             write_logs=write_logs,
             logs_path=logs_path,
             msg_type="url_not_valid",
@@ -65,6 +65,7 @@ def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None
 
     # Si no hay que comprobar la accesibilidad de la URL
     if not accessible:
+
         return True
 
     # Hacer la petición a la URL
@@ -80,20 +81,24 @@ def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None
         )
 
         # Levantar una exception si no se obtuvo una respuesta
-        # satisfactoria.
+        # satisfactoria
         response.raise_for_status()
 
-        # Retornar el contenido.
+        # Retornar el contenido
         return response
 
     except requests.exceptions.RequestException as err:
 
         if print_msg:
-            print(error("No se pudo establecer conexión con:", "ico"), info(url))
-            print(err)
 
-        # Atualizar los logs.
-        update_download_logs(
+            print(
+                error("No se pudo establecer conexión con:", "ico"),
+                info(url),
+                "\n" + str(err)
+            )
+
+        # Atualizar los logs
+        __update_download_logs(
             write_logs=write_logs,
             logs_path=logs_path,
             msg_type="url_not_accessible",
@@ -104,13 +109,13 @@ def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None
         return
 
 
-def obtain_filename(response: requests.Response, url: str, missing_name: str | None = None) -> str:
+def __obtain_filename(response: requests.Response, url: str, missing_name: str | None = None) -> str:
     """
     Obtener el nombre de un archivo que se va a descargar
     desde internet
 
     Parameters:
-    response (requests.Response): Respuesta obtenida del URL
+    response (requests.Response): Respuesta obtenida de la URL
     url (str): Dirección web del archivo
     missing_name (str): Nombre por defecto si no se obtiene el nombre del archivo
 
@@ -134,40 +139,7 @@ def obtain_filename(response: requests.Response, url: str, missing_name: str | N
     return default_name
 
 
-def rename_download_file(path_src: str | Path) -> str:
-    """
-    Renombrar el archivo a descargar
-
-    Parameters:
-    path_src (str | Path): Ruta completa del archivo
-
-    Returns:
-    str: Ruta del archivo renombrado
-    """
-
-    # Segmentar la ruta original
-    path_src = Path(path_src)
-
-    parent = path_src.parent
-    name = path_src.stem
-    ext = path_src.suffix
-
-    # Conformar nueva ruta renombrada
-    num = 1
-    path_new = parent / f'{name}_{str(num)}{ext}'
-
-    # Verificar que no exista la nueva ruta
-    while validate_path(str(path_new), print_msg=False):
-
-        # Sí existe, seguimos creando una nueva ruta hasta que no exista
-        num += 1
-        path_new = parent / f'{name}_{str(num)}{ext}'
-
-    # Retornamos la ruta del archivo renombrado
-    return str(path_new)
-
-
-def update_download_logs(write_logs: bool, logs_path: str | Path, msg_type: str, url: str, filepath: str | None = None, err: str | None = None) -> None:
+def __update_download_logs(write_logs: bool, logs_path: str | Path, msg_type: str, url: str, filepath: str | None = None, err: str | None = None) -> None:
     """
     Actualizar los logs de la descarga
 
@@ -185,6 +157,7 @@ def update_download_logs(write_logs: bool, logs_path: str | Path, msg_type: str,
 
     # Comprobar si no hay que guardar los logs o no hay ruta
     if not (write_logs and logs_path):
+
         return
 
     # Mensajes a guardar en los logs
@@ -208,14 +181,17 @@ def update_download_logs(write_logs: bool, logs_path: str | Path, msg_type: str,
 
         # Guardar el mensaje de error también, sí existe
         if err:
+
             msg += f'\t\t\t{err}\n'
 
         # Escribir los logs en un archivo.
         try:
-            write_file(logs_path, content_write=msg)
 
-        except:
-            pass
+            write_text_file(logs_path, content=msg, print_msg=False)
+
+        except Exception as err:
+
+            print(error("Error al actualizar los logs", "ico"), "\n" + str(err))
 
 
 def download_file(url: str, filename: str | None = None, path_dst: str | None = None, overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int = 1, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour: str | None = None, position: int | None = None, desc_len: int | None = None, print_msg: bool = True) -> str | bool | None:
@@ -257,7 +233,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
     """
 
     # Obtener la ruta para guardar la descarga
-    path_dst = create_downloadsdir(path_dst)
+    path_dst = create_downloads_dir(path_dst)
 
     # Obtener la ruta del archivo de los logs
     logs_path = logs_path or join_path(path_dst, "logs.txt")
@@ -285,10 +261,11 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
     if filesize == 0:
 
         if print_msg:
+
             print(error("El archivo no se encuentra o está vacio:", "ico"), info(url))
 
         # Atualizar los logs
-        update_download_logs(
+        __update_download_logs(
             write_logs=write_logs,
             logs_path=logs_path,
             msg_type="file_empty",
@@ -304,23 +281,28 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
 
     else:
 
-        filename = obtain_filename(response, url, missing_name)
+        filename = __obtain_filename(response, url, missing_name)
 
     # Obtener la ruta del archivo
     filepath = join_path(path_dst, filename)
 
-    # Comprobar si existe el archivo
+    # Comprobar si existe el archivo a descargar
     if validate_path(filepath, print_msg=False):
 
         # Comprobar si no se va a sobreescribir o renombrar
         if not (overwrite or rename):
 
             if print_msg:
-                print(warning("Ya existe:", "ico"), info(filepath))
-                print(bold("  URL:"), info(url))
+
+                print(
+                    warning("Ya existe:", "ico"),
+                    info(filepath),
+                    "\n" + bold("  URL:"),
+                    info(url)
+                )
 
             # Atualizar los logs.
-            update_download_logs(
+            __update_download_logs(
                 write_logs=write_logs,
                 logs_path=logs_path,
                 msg_type="file_exists",
@@ -330,10 +312,10 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
 
             return False  # Retornar una advertencia
 
-        # Comprobar sí se va a renombrar.
+        # Comprobar sí se va a renombrar
         if rename:
 
-            filepath = rename_download_file(filepath)
+            filepath = rename_exists_file(filepath)
             filename = Path(filepath).name
 
     # Conformar el formato de la barra de progreso
@@ -346,14 +328,14 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
         name = Path(filename).stem
         ext = Path(filename).suffix
 
-        # Cortar el nombre del archivo si muy largo
-        description = f'{name[:desc_len - 3 - len(ext)]}...{bold(ext)}'
+        # Cortar el nombre del archivo si es muy largo
+        description = f'{name[:desc_len - 3 - len(ext)]}{info("...")}{ext}'
 
     else:
 
         description = filename
 
-    # Definir la barra de progreso.
+    # Definir la barra de progreso
     pbar = tqdm(
         total=filesize,
         desc=description,
@@ -367,22 +349,23 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
         position=position
     )
 
-    # Descargar el archivo.
+    # Descargar el archivo
     try:
 
         with open(filepath, "wb") as file:
 
             if disable_pbar:
+
                 print(bold("Descargando:"), info(filepath))
 
-            # Escribir el archivo y actualizar la barra de progreso.
+            # Escribir el archivo y actualizar la barra de progreso
             for data in response.iter_content(chunk_size=chunk_size * 10):
 
                 size = file.write(data)
                 pbar.update(size)
 
-            # Atualizar los logs.
-            update_download_logs(
+            # Atualizar los logs
+            __update_download_logs(
                 write_logs=write_logs,
                 logs_path=logs_path,
                 msg_type="downloaded",
@@ -395,11 +378,16 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
     except Exception as err:
 
         if print_msg:
-            print(error("Error al descargar:", "ico"), info(filename))
-            print(bold("  URL:"), info(url))
 
-        # Atualizar los logs.
-        update_download_logs(
+            print(
+                error("Error al descargar:", "ico"),
+                info(filename),
+                "\n" + bold("  URL:"),
+                info(url)
+            )
+
+        # Atualizar los logs
+        __update_download_logs(
             write_logs=write_logs,
             logs_path=logs_path,
             msg_type="download_error",
@@ -412,7 +400,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
 
 
 # COMMENT Funciones para descargar varios archivos simultaneos
-def organize_urls_data(urls_data: list, path_dst: str, char_separation: str = ",") -> list:
+def __organize_urls_data(urls_data: list, path_dst: str, char_separation: str = ",") -> list:
     """
     Organizar en tuplas los datos de las URLs a descargar
 
@@ -463,7 +451,7 @@ def organize_urls_data(urls_data: list, path_dst: str, char_separation: str = ",
     return result
 
 
-def update_description_pbar(result: str | bool | None, downloads_status: dict) -> tuple:
+def __update_description_pbar(result: str | bool | None, downloads_status: dict) -> tuple:
     """
     Actualizar la descripción de la barra de progreso principal
     cuando se descarga varios archivos
@@ -557,10 +545,10 @@ def download_files(urls_data: list, path_dst: str | None = None, max_workers: in
     """
 
     # Ruta para guardar las descargas
-    path_dst = obtain_downloadspath(path_dst)
+    path_dst = obtain_downloads_path(path_dst)
 
     # Organizar en tuplas los datos de las URLs
-    data_organized = organize_urls_data(urls_data, path_dst, char_separation)
+    data_organized = __organize_urls_data(urls_data, path_dst, char_separation)
 
     # Definir la barra de progreso principal
     progress_bar = tqdm(
@@ -633,7 +621,7 @@ def download_files(urls_data: list, path_dst: str | None = None, max_workers: in
                     result = future.result()
 
                     # Actualizar la descripción de la barra de progreso
-                    desc, downloads_status = update_description_pbar(
+                    desc, downloads_status = __update_description_pbar(
                         result, downloads_status)
 
                     pbar.set_description(desc)

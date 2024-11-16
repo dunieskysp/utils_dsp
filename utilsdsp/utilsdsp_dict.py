@@ -6,7 +6,7 @@ Operaciones con Diccioanrios:
 from outputstyles import warning, bold, error
 
 
-def join_list_to_dict(key_list: list, value_list: list, keys_to_str: bool = True) -> dict:
+def join_list_to_dict(key_list: list, value_list: list, keys_to_str: bool = True) -> dict | None:
     """
     Unir dos listas en un diccionario
 
@@ -21,34 +21,38 @@ def join_list_to_dict(key_list: list, value_list: list, keys_to_str: bool = True
 
     Returns:
     dict: Diccionario con las llaves y valores asociados
+    None: Si las longitudes de las lista son diferentes
+         o ocurrió algún error
     """
-
-    def __liststr(data_list: list) -> list:
-        """
-        Convertir los datos de una lista a string
-        """
-
-        return [str(item) for item in data_list]
 
     # Comprobar que se correspondan las longitudes
     if len(key_list) != len(value_list):
 
-        print(warning("Las longitudes no se corresponden:", "ico"))
-        print(bold("Keys:"), key_list)
-        print(bold("Values:"), value_list)
+        print(
+            error("Las longitudes no se corresponden:", "ico"),
+            "\n" + bold("Keys:"),
+            key_list,
+            "\n" + bold("Values:"),
+            value_list
+        )
 
         return
 
     # Convertir las llaves a string
-    keys = __liststr(key_list) if keys_to_str else key_list
+    keys = [str(item) for item in key_list] if keys_to_str else key_list
 
-    # Relacionar las dos listas en un diccionario.
+    # Relacionar las dos listas en un diccionario
     try:
+
         return {key: value for key, value in zip(keys, value_list)}
 
     except Exception as err:
 
-        print(error("No se pudo crear el diccionario desde las dos listas.", "ico"))
-        print(bold("Keys:"), key_list)
-        print(bold("Values:"), value_list)
-        print(err)
+        print(
+            error("No se pudo crear el diccionario desde las dos listas", "btn_ico"),
+            "\n" + bold("Keys:"),
+            key_list,
+            "\n" + bold("Values:"),
+            value_list,
+            "\n" + str(err)
+        )

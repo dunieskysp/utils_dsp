@@ -1,9 +1,9 @@
 """
-Obtener tamaño de ficheros y directorios.
-    - natural_size()
-    - obtain_sizedir()
-    - obtain_sizefile()
-    - obtain_size()
+Tamaño de archivos y directorios:
+    - natural_size: Convertir los bytes a medidas más legibles
+    - obtain_size_dir: Obtener el tamaño de un directorio
+    - obtain_size_file: Obtener el tamaño de un archivo
+    - obtain_size: Obtener tamaño de un archivo o directorio
 """
 
 import os
@@ -14,25 +14,27 @@ from utilsdsp import validate_path
 
 def natural_size(size_file: int, unit: str | None = None) -> str:
     """
-    Convertir los bytes a medidas más legibles (KB, MB, GB o TB).
+    Convertir los bytes a medidas más legibles (KB, MB, GB o TB)
 
     Parameters:
-    size_file (int): Tamaño del fichero en bytes.
-    unit (str | None) [Opcional]: Unidad para dar el resulado.
-    - KB, MB, GB o TB
+    size_file (int): Tamaño del archivo en bytes
+    unit (str | None): Unidad a mostrar el resulado (KB, MB, GB o TB)
 
     Returns:
-    srt: Devuelve el tamaño del fichero en bytes, KB, MB, GB o TB.
+    srt: Devuelve el tamaño del archivo en bytes, KB, MB, GB o TB
     """
 
-    # Comprobar que sea válido el tamaño del fichero o directorio.
+    # Comprobar que sea válido el tamaño del archivo o directorio.
     if not isinstance(size_file, int):
+
         return warning("El tamaño debe ser un número y mayor que 0.", "ico")
 
+    # Comprobar que el tamaño sea mayor que 0
     if size_file <= 0:
+
         return "0 bytes"
 
-    # Unidades y sus valores en que se va a expresar el resultado.
+    # Unidades y sus valores en que se va a expresar el resultado
     units = {
         "TB": 1024 ** 4,
         "GB": 1024 ** 3,
@@ -41,18 +43,18 @@ def natural_size(size_file: int, unit: str | None = None) -> str:
         "BYTES": 1
     }
 
-    # Poner en mayúscula la unidad del argumento.
+    # Sanear la unidad
     unit = unit.upper() if unit and isinstance(unit, str) else ""
 
-    # Si la unidad introducida es válida.
+    # Si la unidad introducida es válida
     if unit in units:
 
-        # Convertir el tamaño a esa unidad.
+        # Convertir el tamaño a esa unidad
         size = size_file / units[unit]
 
     else:
 
-        # Buscar la medida más acorde según la cantidad de bytes.
+        # Buscar la medida más acorde según la cantidad de bytes
         for unit, value in units.items():
 
             if size_file >= value:
@@ -61,102 +63,110 @@ def natural_size(size_file: int, unit: str | None = None) -> str:
 
                 break
 
-    # Retornamos el tamaño obtenido redondeado y con su Unidad.
+    # Retornamos el tamaño obtenido redondeado y con su Unidad
     return f'{round(size, 2)} {unit.lower() if unit == "BYTES" else unit}'
 
 
-def obtain_sizedir(path_src: str | Path, unit: str | None = None, file_type: str = "*") -> str:
+def __obtain_size_dir(path_src: str | Path, unit: str | None = None, file_type: str = "*") -> str | None:
     """
-    Obtener tamaño de un directorio con "Path().rglob()" y "Path().stat()".
+    Obtener el tamaño de un directorio
 
     Parameters:
-    path_src (str | Path): Ruta del directorio para determinar su tamaño.
-    unit (str | None) [Opcional]: Unidad para dar el resulado (KB, MB, GB o TB).
-    file_type (str) [Opcional]: Tipos de ficheros a seleccionar.
+    path_src (str | Path): Ruta del directorio para determinar su tamaño
+    unit (str | None): Unidad para dar el resulado (KB, MB, GB o TB)
+    file_type (str): Tipos de archivos a seleccionar
 
     Returns:
-    str: Suma del tamaño de todos los ficheros con su unidad de medida.
+    str: Suma del tamaño de todos los elementos en el directorio
+    None: Sí la ruta no es válida o sí no es directorio
     """
 
-    # Comprobar que exista el directorio.
+    # Comprobar que exista el directorio
     if not validate_path(path_src):
+
         return
 
-    # Construir rutas absolutas para evitar problemas con rutas relativas.
-    path_src = Path(path_src).resolve()
+    # Construir rutas absolutas y un objeto Path
+    path = Path(path_src).resolve()
 
-    # Comprobar que sea un directorio.
-    if not path_src.is_dir():
-        return f'{error("No es un directorio:", "ico")} {info(path_src)}'
+    # Comprobar que sea un directorio
+    if not path.is_dir():
 
-    # Obtener la suma del tamaño de todos los fichero.
+        return f'{error("No es un directorio:", "ico")} {info(path)}'
+
+    # Obtener la suma del tamaño de todos los archivos
     total_size = sum(
         [
-            file.stat().st_size for file in path_src.rglob(f'*.{file_type}')
+            file.stat().st_size for file in path.rglob(f'*.{file_type}')
         ]
     )
 
-    # Retornar el tamaño total con su unidad de medida.
+    # Retornar el tamaño total con su unidad de medida
     return natural_size(total_size, unit) if total_size else "0 bytes"
 
 
-def obtain_sizefile(path_src: str | Path, unit: str | None = None, metod_stat: bool = False, metod_getsize: bool = False) -> str:
+def __obtain_size_file(path_src: str | Path, unit: str | None = None, method_stat: bool = False, method_getsize: bool = False) -> str | None:
     """
-    Obtener tamaño de un fichero.
+    Obtener el tamaño de un archivo
 
     Parameters:
-    path_src (str | Path): Ruta del fichero a determinar su tamaño.
-    unit (str | None) [Opcional]: Unidad para dar el resulado (KB, MB, GB o TB).
-    metod_stat (bool) [Opcional]: Usar os.stat() para determinar el tamaño.
-    metod_getsize (bool) [Opcional]: Usar os.path.getsize() para determinar el tamaño.
+    path_src (str | Path): Ruta del archivo a determinar su tamaño
+    unit (str | None): Unidad para dar el resulado (KB, MB, GB o TB)
+    method_stat (bool): Usar os.stat() para determinar el tamaño
+    metod_getsize (bool): Usar os.path.getsize() para determinar el tamaño
 
     Returns:
-    str: Tamaño del fichero con su unidad de medida.
+    str: Tamaño del archivo con su unidad de medida.
+    None: Sí la ruta no es válida o sí no es archivo
     """
 
-    # Comprobar que exista el fichero.
+    # Comprobar que exista el archivo
     if not validate_path(path_src):
+
         return
 
-    # Construir rutas absolutas para evitar problemas con rutas relativas.
-    path_src = Path(path_src).resolve()
+    # Construir rutas absolutas y un objeto Path
+    path = Path(path_src).resolve()
 
-    # Comprobar que sea un fichero.
-    if not path_src.is_file():
-        return f'{error("No es un fichero:", "ico")} {info(path_src)}'
+    # Comprobar que sea un archivo
+    if not path.is_file():
 
-    # Método 01: os.stat().
-    if metod_stat:
-        return natural_size(os.stat(path_src).st_size, unit)
+        return f'{error("No es un archivo:", "ico")} {info(path)}'
 
-    # Método 02: os.path.getsize().
-    elif metod_getsize:
-        return natural_size(os.path.getsize(path_src), unit)
+    # Método 01: os.stat()
+    if method_stat:
+        return natural_size(os.stat(path).st_size, unit)
 
-    # Método 03: Path.stat().
-    return natural_size(path_src.stat().st_size, unit)
+    # Método 02: os.path.getsize()
+    elif method_getsize:
+        return natural_size(os.path.getsize(path), unit)
+
+    # Método 03: Path.stat()
+    return natural_size(path.stat().st_size, unit)
 
 
 def obtain_size(path_src: str | Path, unit: str | None = None, file_type: str = "*") -> str:
     """
-    Obtener tamaño de un fichero o directorio.
+    Obtener tamaño de un archivo o directorio
 
     Parameters:
-    path_src (str | Path): Ruta del fichero o directorio a determinar su tamaño.
-    unit (str | None) [Opcional]: Unidad para dar el resulado (KB, MB, GB o TB).
-    file_type (str) [Opcional]: Tipos de ficheros a seleccionar.
+    path_src (str | Path): Ruta del archivo o directorio a determinar su tamaño
+    unit (str | None): Unidad para dar el resulado (KB, MB, GB o TB)
+    file_type (str): Tipos de archivos a seleccionar en el directorio
 
     Returns:
-    str: Tamaño del fichero o directorio con su unidad de medida.
+    str: Tamaño del archivo o directorio con su unidad de medida
     """
 
-    # Comprobar que exista el directorio o fichero.
+    # Comprobar que exista el directorio o archivo
     if not validate_path(path_src):
+
         return
 
-    # Sí es un fichero.
+    # Obtener tamaño de un archivo
     if Path(path_src).is_file():
-        return obtain_sizefile(path_src, unit)
 
-    # Si es un directorio.
-    return obtain_sizedir(path_src, unit, file_type)
+        return __obtain_size_file(path_src, unit)
+
+    # Obtener tamaño de un directorio
+    return __obtain_size_dir(path_src, unit, file_type)

@@ -1,129 +1,154 @@
 """
-Operaciones con ficheros.
-    - read_file()
-    - write_file()
+Operaciones con archivos:
+    - read_text_file: Leer un archivo de texto
+    - write_text_file: Guardar texto en un archivo
 """
 
 from pathlib import Path
-from outputstyles import error, info, warning
+from outputstyles import error, info, warning, success
 from utilsdsp import create_dir, validate_path
 
 
-def read_file(path_file: str | Path, by_line: bool = True) -> list | str:
+def read_text_file(path_file: str | Path, by_line: bool = True, print_msg: bool = True) -> list | str | None:
     """
-    Leer el contenido de un fichero.
+    Leer un archivo de texto
 
     Parameters:
-    path_file (str | Path): Ruta del fichero a leer.
-    by_line (bool) [Opcional]: Leer el contenido por lineas.
+    path_file (str | Path): Ruta del archivo a leer
+    by_line (bool): Leer el contenido por líneas
+    print_msg (bool): Imprimir un mensaje si no existe el archivo
 
     Returns:
-    list | str: El contenido por líneas o un string con todo.
+    list: Contenido según las líneas leidas
+    str: Todo el contenido en un string
+    None: Si el archivo no existe o no se pudo leer
     """
 
-    # Comprobar que exista el fichero.
-    if not validate_path(path_file):
+    # Comprobar que exista el archivo
+    if not validate_path(path_file, print_msg=print_msg):
+
         return
 
-    # Construir rutas absolutas para evitar problemas con rutas relativas.
-    path_file = Path(path_file).resolve()
+    # Construir rutas absolutas y un objeto Path
+    file = Path(path_file).resolve()
 
-    # Comprobar que sea un fichero.
-    if not path_file.is_file():
-        print(error("No es un fichero:", "ico"), info(path_file))
+    # Comprobar que sea un archivo
+    if not file.is_file():
+
+        print(error("No es un archivo:", "ico"), info(file))
+
         return
 
-    # Leer el contenido del fichero.
+    # Leer el contenido del archivo
     try:
 
-        # Retornar el resultado en una lista según las lineas.
-        if by_line:
-            return path_file.read_text("utf-8").split("\n")
+        content = file.read_text("utf-8")
 
-        # Retornar el resultado en una cadena todo.
-        return path_file.read_text("utf-8")
+        # Retornar una lista según las lineas o todo en un solo string
+        return content.split("\n") if by_line else content
 
     except Exception as err:
 
-        print(error("No se pudo leer el fichero:", "ico"), info(path_file))
-        print(err)
+        print(
+            error("Error al leer el archivo:", "ico"),
+            info(file),
+            "\n" + str(err)
+        )
 
 
-def write_file(path_file: str | Path, content_write: str | list) -> str:
+def write_text_file(path_file: str | Path, content: str | list, replace: bool = False, print_msg: bool = True) -> str | None:
     """
-    Escribir contenido dentro de un fichero.
+    Guardar texto en un archivo
 
     Parameters:
-    path_file (str | Path): Ruta del fichero a escribir.
-    content_write (str | list): Contenido que se va a guardar.
+    path_file (str | Path): Ruta del archivo a escribir
+    content (str | list): Contenido que se va a guardar
+    replace (bool): Reemplazar el contenido si existe el archivo
+    print_msg (bool): Imprimir mensaje satisfactorio
 
     Returns:
-    str: Ruta del fichero guardado.
+    str: Ruta del archivo guardado
+    None: Sí no hay contenido, sí no es un archivo o sí no se pudo escribir
     """
 
-    # Comprobar que el contenido no este vacio.
-    if not content_write:
+    # Comprobar que el contenido no este vacio
+    if not content:
+
         print(warning("El contenido no puede estar vacio.", "ico"))
+
         return
 
-    # Construir rutas absolutas para evitar problemas con rutas relativas.
-    path_file = Path(path_file).resolve()
+    # Construir rutas absolutas y un objeto Path
+    file = Path(path_file).resolve()
 
-    # Comprobar sí existe y no es un fichero.
-    if path_file.exists() and not path_file.is_file():
-        print(warning("Ya existe y no es un fichero:", "ico"), info(path_file))
+    # Comprobar sí existe y no es un archivo
+    if file.exists() and not file.is_file():
+
+        print(warning("Ya existe y no es un archivo:", "ico"), info(file))
+
         return
 
-    # Crear sí no existe la ruta padre.
-    create_dir(path_file.parent)
+    # Crear la ruta padre sí no existe
+    create_dir(file.parent)
 
-    try:
+    # Determinar como guardar el contenido, por líneas o un string
+    by_line = True if isinstance(content, list) else False
 
-        # Sí es una lista, lo escribimos por lineas.
-        if isinstance(content_write, list):
+    # Preparar el contenido a guardar, según si existe el achivo
+    # y sí se va a reemplazar el contenido existente o no
+    if file.exists() and not replace:
 
-            # Comprobar sí existe el fichero.
-            if path_file.exists():
+        # Leemos el contenido del archivo existente
+        old_content = read_text_file(file, by_line=by_line)
 
-                # Leemos su contenido por lineas.
-                content_file = read_file(path_file)
+        # Agregamos el nuevo contenido al existente
+        if by_line:
 
-                # Agregamos el contenido a guardar.
-                content_file.extend(content_write)
+            # Sí es una lista el contenido
+            old_content.extend(content)
 
-                content = content_file
+            new_content = old_content
 
-            else:
-                content = content_write
-
-            # Convertir a string todo el contenido.
-            content = [str(item) for item in content]
-
-            # Escribimos el contenido en el fichero por lineas.
-            path_file.write_text("\n".join(content), "utf-8")
-
-        # Sí es un texto u otro, lo guardamos tal y como viene.
         else:
 
-            # Comprobar sí existe el fichero.
-            if path_file.exists():
+            # Sí es un string el contenido
+            new_content = old_content + f'\n{content}'
 
-                # Leemos su contenido como un string.
-                content_file = read_file(path_file, by_line=False)
+    # Si no existe o se va a reemplazar el contenido
+    else:
 
-                # Agregamos el contenido a guardar.
-                content = content_file + f'\n{content_write}'
+        new_content = content
 
-            else:
-                content = content_write
+    # Guardar el contenido en el archivo
+    try:
 
-            # Escribimos el contenido en el fichero como un texto.
-            path_file.write_text(content, "utf-8")
+        # Guardar una lista
+        if by_line:
 
-        # Retornar la ruta absoluta del fichero.
-        return str(path_file)
+            # Convertir a string los elementos de la lista
+            new_content = [str(item) for item in new_content]
+
+            # Escribimos el contenido en el archivo por líneas
+            file.write_text("\n".join(new_content), "utf-8")
+
+        # Guardar un texto
+        else:
+
+            # Escribimos el contenido en el archivo como un texto único
+            file.write_text(str(new_content), "utf-8")
+
+        # Imprimir mensaje satisfactorio
+        if print_msg:
+
+            print(success("Guardado el contenido en:", "ico"), info(file))
+
+        # Retornar la ruta absoluta del archivo
+        return str(file)
 
     except Exception as err:
 
-        print(error("Error al escribir en el fichero:", "ico"), info(path_file))
-        print(err)
+        print(
+            error("Error al escribir en el archivo:", "ico"),
+            info(file),
+            "\n" + str(err)
+        )

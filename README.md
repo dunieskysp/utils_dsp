@@ -1,6 +1,6 @@
 # Utils DSP
 
-Algunnas funciones útiles.
+Algunas funciones útiles.
 
 ## Install
 

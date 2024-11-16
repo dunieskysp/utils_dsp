@@ -1,6 +1,6 @@
 """
 Otras funciones útiles:
-    - obtain_url_from_html: Obtener la URL desde un fichero HTML
+    - obtain_url_from_html: Obtener la URL desde un archivo HTML
     - create_headers_decorates: Crear un encabezado decorado
     - clear_output: Limpiar salida en la Terminal según el SO
     - calc_img_dimensions: Calcular las dimensiones de una imagen
@@ -9,56 +9,60 @@ Otras funciones útiles:
 
 import os
 from pathlib import Path
-from utilsdsp import validate_path, read_file
-from outputstyles import warning, error, info, bold, add_text_styles
+from utilsdsp import validate_path, read_text_file
+from outputstyles import warning, error, info, add_text_styles
 
 
 def obtain_url_from_html(path_src: str | Path, num_line: int = 3) -> str | None:
     """
-    Obtener la URL desde un fichero HTML, guardado
+    Obtener la URL desde un archivo HTML, guardado
     con SingleFile (Extensión de Firefox)
 
     Parameters:
-    path_src (str | Path): Ruta del fichero HTML
+    path_src (str | Path): Ruta del archivo HTML
     num_line (int): Número de la linea donde está la URL
 
     Returns:
-    str: URL real del fichero HTML
-    None: Si no se obtuvo la URL o no es un fichero HTML
+    str: URL real del archivo HTML
+    None: Si no se obtuvo la URL o no es un archivo HTML
     """
 
-    # Comprobar que exista el fichero HTML
+    # Comprobar que exista el archivo HTML
     if not validate_path(path_src):
+
         return
 
     # Construir rutas absolutas para evitar problemas con rutas relativas
     path_src = Path(path_src).resolve()
 
-    # Comprobar que sea un fichero HTML
+    # Comprobar que sea un archivo HTML
     if path_src.suffix.lower() != ".html":
 
         print(
-            warning("Solo se aceptan ficheros HTML:", "ico"),
+            warning("No es un archivo HTML:", "ico"),
             error(path_src, "ico")
         )
         return
 
-    # Leer contenido del fichero HTML por lineas.
-    content_html = read_file(path_src)
+    # Leer contenido del archivo HTML por lineas
+    content_html = read_text_file(path_src)
 
     try:
 
         num_line = num_line if isinstance(num_line, int) else 3
 
-        # Retornar la URL real (Siempre es la 3ra línea).
+        # Retornar la URL real (Siempre es la 3ra línea)
         # Ej:  url: https://dominio.com/otra/dir/
         # return content_html[num_line - 1].strip().split(" ")[1]
         return content_html[num_line - 1].replace("url:", "").strip()
 
     except Exception as err:
 
-        print(error("No se pudo obtener la URL de:", "ico"), info(path_src))
-        print(err)
+        print(
+            error("No se pudo obtener la URL de:", "ico"),
+            info(path_src),
+            "\n" + str(err)
+        )
 
 
 def create_headers_decorates(header: str, chars_cant: int = 100, decoration: str = "*", deco_init: int = 2, styles: list | None = None) -> str:
@@ -123,14 +127,17 @@ def clear_output() -> None:
 
     # Si es Windows
     if os.name == "nt":
+
         os.system("cls")
 
     # Si es Unix o Linux
     elif os.name == "posix":
+
         os.system("clear")
 
     # En otros casos, imprime 120 nuevas líneas
     else:
+
         print("\n" * 120)
 
 
@@ -160,14 +167,15 @@ def calc_img_dimensions(img_size: tuple, width_final: int | None = None, height_
         # Fórmula: width_final = height_final / height_org * width_org
         width_final = round(height_final / int(img_size[1]) * int(img_size[0]))
 
-    # Retornar el mismo tamaño de la imagen si no son válidos.
+    # Retornar el mismo tamaño de la imagen si no son válidos (ancho, alto)
     else:
+
         width_final, height_final = img_size
 
     return width_final, height_final
 
 
-def obtain_similar_vars(var_name: str, var_cant: int, all_vars: dict, value: bool = True) -> list:
+def obtain_similar_vars(var_name: str, var_cant: int, all_vars: dict, value: bool = True) -> list | None:
     """
     Obtener el valor de las variables que tienen el nombre similar,
     solo le cambia un número a cada una
@@ -181,6 +189,7 @@ def obtain_similar_vars(var_name: str, var_cant: int, all_vars: dict, value: boo
 
     Returns:
     list: Valor o nombre de las variables no nulas
+    None: Si ocurrio algún error
     """
 
     try:
@@ -198,4 +207,5 @@ def obtain_similar_vars(var_name: str, var_cant: int, all_vars: dict, value: boo
         ]
 
     except Exception as err:
-        print(error("Error al obtener la variable:", "ico"), err)
+
+        print(error("Error al obtener las variables:", "ico"), err)
