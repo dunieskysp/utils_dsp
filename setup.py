@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 from pathlib import Path
 
 # La descripción larga va a ser el mismo fichero README.md
-long_desc = Path("README.md").read_text()
+long_desc = Path("README.md").read_text("utf-8")
 
 # Datos del paquete
 setup(
     name="utilsdsp",
-    version="0.1.0",
+    version="0.1.1",
     author="Duniesky Salazar Pérez",
     author_email="<duniesky.salazar@gmail.com>",
     description="Algunas funciones útiles",

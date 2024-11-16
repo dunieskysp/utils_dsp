@@ -26,7 +26,7 @@ Tabla de contenido
 
 ## Install
 
-La instalación vía pip es sencilla, solo ejecutar la siguiente línea en la terminal del proyecto de Python.
+La instalación vía `pip` es sencilla, solo ejecutar la siguiente línea en la terminal del proyecto de Python.
 
 ```bash
   pip install utilsdsp
@@ -47,7 +47,7 @@ from utilsdsp import compress, uncompress
 - `change_current_path` - Cambiar la ruta actual de ejecución del script
 - `validate_path` - Válidar sí la ruta existe
 - `join_path` - Unir rutas en una sola
-- `obtain_default_path` - Obtener la ruta absoluta por defecto (PC o Google Colab)
+- `obtain_default_path` - Obtener la ruta absoluta por defecto _(PC o Google Colab)_
 - `obtain_downloads_path` - Obtener la ruta para guardar las descargas
 - `rename_exists_file` - Renombrar un archivo sí existe en el destino
 
@@ -101,7 +101,7 @@ from utilsdsp import compress, uncompress
 
 ### Organizar directorios
 
-- `move_to_root` - Mover archivos de los sub-directorios hacía el directorio raíz
+- `move_to_root` - Mover archivos de los sub-directorios hacia el directorio raíz
 - `move_files_to_subdir` - Mover archivos hacia un sub-directorio dentro de los sub-directorios de nivel 1
 - `organize_files_by_type` - Organizar los archivos en directorios según su tipo
 - `organize_files_by_name` - Organizar los archivos en directorios según su nombre
@@ -110,7 +110,7 @@ from utilsdsp import compress, uncompress
 
 - `validate_and_resquest` - Comprobar sí una URL es válida y accesible
 - `download_file` - Descargar un archivo desde internet
-- `download_files` - Descargar multiples archivos simultaneos desde internet
+- `download_files` - Descargar multiples archivos simultáneos desde internet
 
 ## Documentation
 
