@@ -372,6 +372,8 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
                 size = file.write(data)
                 pbar.update(size)
 
+            pbar.close()
+
             # Atualizar los logs
             __update_download_logs(
                 write_logs=write_logs,
