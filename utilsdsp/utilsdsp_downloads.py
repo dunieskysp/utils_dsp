@@ -11,6 +11,7 @@ Descargar varios archivos desde internet
     - download_files: Descargar multiples archivos simultaneos desde internet
 """
 
+import os
 import requests
 import validators
 from pathlib import Path
@@ -502,13 +503,24 @@ def __update_description_pbar(result: str | bool | None, downloads_status: dict)
     # Conformar la descripción con las estadísticas actualizadas
     file = "archivos" if downloads_status["downloaded"] > 1 else "archivo"
 
-    desc = success(
-        f'Descargado: {downloads_status["downloaded"]} {file} ({natural_size(downloads_status["size"])})'
-    )
+    # Conformar descripción si se está trabajando en Google Colab
+    if os.getenv("COLAB_RELEASE_TAG"):
 
-    desc += warning(f'  Warnings: {downloads_status["warnings"]}')
+        desc = f'Descargado: {downloads_status["downloaded"]} {file} ({natural_size(downloads_status["size"])})'
 
-    desc += error(f'  Errors: {downloads_status["errors"]}')
+        desc += f'  Warnings: {downloads_status["warnings"]}'
+
+        desc += f'  Errors: {downloads_status["errors"]}'
+
+    else:
+
+        desc = success(
+            f'Descargado: {downloads_status["downloaded"]} {file} ({natural_size(downloads_status["size"])})'
+        )
+
+        desc += warning(f'  Warnings: {downloads_status["warnings"]}')
+
+        desc += error(f'  Errors: {downloads_status["errors"]}')
 
     return desc, downloads_status
 
