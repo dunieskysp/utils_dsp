@@ -202,7 +202,7 @@ def __update_download_logs(write_logs: bool, logs_path: str | Path, msg_type: st
             print(error("Error al actualizar los logs", "ico"), "\n" + str(err))
 
 
-def download_file(url: str, filename: str | None = None, path_dst: str | None = None, overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int = 1, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour: str | None = None, position: int | None = None, desc_len: int | None = None, print_msg: bool = True) -> str | bool | None:
+def download_file(url: str, filename: str | None = None, path_dst: str | None = None, overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int | None = None, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour: str | None = None, position: int | None = None, desc_len: int | None = None, print_msg: bool = True) -> str | bool | None:
     """
     Descargar un archivo desde internet
 
@@ -219,7 +219,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
     logs_path (str): Ruta del archivo de los logs
 
     timeout (int): Tiempo de espera por una respuesta del servidor
-    chunk_size (int): Tamaño del bloque a descargar desde el servidor
+    chunk_size (int | None): Tamaño del bloque a descargar desde el servidor
     headers (dict | None): Datos del Headers de la petición Get
     cookies (dict | None): Datos de las cookies de la petición Get
     auth (dict | None): Credenciales de autenticación
@@ -356,6 +356,16 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
         leave=leave,
         position=position
     )
+
+    # Definir el chunk_size
+    if chunk_size and isinstance(chunk_size, int):
+
+        chunk_size = chunk_size
+
+    else:
+
+        # El chunk_size va a ser de 64KB por defecto
+        chunk_size = 1024 * 64
 
     # Descargar el archivo
     try:
@@ -503,7 +513,7 @@ def __update_description_pbar(result: str | bool | None, downloads_status: dict)
     return desc, downloads_status
 
 
-def download_files(urls_data: list, path_dst: str | None = None, max_workers: int = 1, char_separation: str = ",", overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int = 1, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour_main: str | None = "green", colour: str | None = None, desc_len: int | None = None, print_msg: bool = False) -> str | None:
+def download_files(urls_data: list, path_dst: str | None = None, max_workers: int = 1, char_separation: str = ",", overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int | None = None, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour_main: str | None = "green", colour: str | None = None, desc_len: int | None = None, print_msg: bool = False) -> str | None:
     """
     Descargar multiples archivos simultaneos desde internet
 
@@ -534,7 +544,7 @@ def download_files(urls_data: list, path_dst: str | None = None, max_workers: in
     logs_path (str): Ruta del archivo de los logs
 
     timeout (int): Tiempo de espera por una respuesta del servidor
-    chunk_size (int): Tamaño del bloque a descargar desde el servidor
+    chunk_size (int | None): Tamaño del bloque a descargar desde el servidor
     headers (dict | None): Datos del Headers de la petición Get
     cookies (dict | None): Datos de las cookies de la petición Get
     auth (dict | None): Credenciales de autenticación
