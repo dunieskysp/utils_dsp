@@ -503,29 +503,31 @@ def __update_description_pbar(result: str | bool | None, downloads_status: dict)
     # Conformar la descripción con las estadísticas actualizadas
     file = "archivos" if downloads_status["downloaded"] > 1 else "archivo"
 
+    stat_downloaded = f'Descargado: {downloads_status["downloaded"]} {file} ({natural_size(downloads_status["size"])})'
+    stat_warnings = f'  Warnings: {downloads_status["warnings"]}'
+    stat_errors = f'  Errors: {downloads_status["errors"]}'
+
     # Conformar descripción si se está trabajando en Google Colab
     if os.getenv("COLAB_RELEASE_TAG"):
 
-        desc = f'Descargado: {downloads_status["downloaded"]} {file} ({natural_size(downloads_status["size"])})'
+        desc = stat_downloaded
 
-        desc += f'  Warnings: {downloads_status["warnings"]}'
+        desc += stat_warnings
 
-        desc += f'  Errors: {downloads_status["errors"]}'
+        desc += stat_errors
 
     else:
 
-        desc = success(
-            f'Descargado: {downloads_status["downloaded"]} {file} ({natural_size(downloads_status["size"])})'
-        )
+        desc = success(stat_downloaded)
 
-        desc += warning(f'  Warnings: {downloads_status["warnings"]}')
+        desc += warning(stat_warnings)
 
-        desc += error(f'  Errors: {downloads_status["errors"]}')
+        desc += error(stat_errors)
 
     return desc, downloads_status
 
 
-def download_files(urls_data: list, path_dst: str | None = None, max_workers: int = 1, char_separation: str = ",", overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int | None = None, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour_main: str | None = "green", colour: str | None = None, desc_len: int | None = None, print_msg: bool = False) -> str | None:
+def download_files(urls_data: list, path_dst: str | None = None, max_workers: int = 1, char_separation: str = ",", overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int | None = None, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour_main: str | None = None, colour: str | None = None, desc_len: int | None = None, print_msg: bool = False) -> str | None:
     """
     Descargar multiples archivos simultaneos desde internet
 
@@ -582,6 +584,11 @@ def download_files(urls_data: list, path_dst: str | None = None, max_workers: in
     # Organizar en tuplas los datos de las URLs
     data_organized = __organize_urls_data(urls_data, path_dst, char_separation)
 
+    # Definir el color de la barra de progreso principal
+    if not (os.getenv("COLAB_RELEASE_TAG") or colour_main):
+
+        colour_main = "green"
+
     # Definir la barra de progreso principal
     progress_bar = tqdm(
         total=len(data_organized),
@@ -589,7 +596,8 @@ def download_files(urls_data: list, path_dst: str | None = None, max_workers: in
         ncols=ncols,
         colour=colour_main,
         leave=True,
-        position=0
+        position=0,
+        unit="File"
     )
 
     # Comenzar la descarga de los archivos
