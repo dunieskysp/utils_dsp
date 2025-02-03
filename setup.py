@@ -7,7 +7,7 @@ long_desc = Path("README.md").read_text("utf-8")
 # Datos del paquete
 setup(
     name="utilsdsp",
-    version="0.1.1",
+    version="0.1.2",
     author="Duniesky Salazar Pérez",
     author_email="<duniesky.salazar@gmail.com>",
     description="Algunas funciones útiles",
