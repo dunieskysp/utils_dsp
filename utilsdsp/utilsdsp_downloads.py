@@ -134,9 +134,10 @@ def __obtain_filename(response: requests.Response, url: str, missing_name: str |
 
         # Retornar nombre del archivo según "filename*"
         # Ej: Content-Disposition: attachment; filename="nombre_del_archivo.ext"; filename*=UTF-8''nombre%20del%20archivo.ext
+        # Ej: Content-Disposition: attachment; filename*=UTF-8''4x-UltraSharp.pth; filename="4x-UltraSharp.pth";
         if "filename*" in content_disposition:
 
-            return unquote(content_disposition.split("\'\'")[-1])
+            return unquote(content_disposition.split("\'\'")[-1].split(";")[0])
 
         # Retornar nombre del archivo según "filename"
         # Ej: Content-Disposition: attachment; filename="nombre_del_archivo.ext";
@@ -366,7 +367,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
                 print(bold("Descargando:"), info(filepath))
 
             # Escribir el archivo y actualizar la barra de progreso
-            for data in response.iter_content(chunk_size=chunk_size * 10):
+            for data in response.iter_content(chunk_size=chunk_size):
 
                 size = file.write(data)
                 pbar.update(size)
