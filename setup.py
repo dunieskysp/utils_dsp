@@ -7,7 +7,7 @@ long_desc = Path("README.md").read_text("utf-8")
 # Datos del paquete
 setup(
     name="utilsdsp",
-    version="0.1.3",
+    version="0.1.4",
     author="Duniesky Salazar Pérez",
     author_email="<duniesky.salazar@gmail.com>",
     description="Algunas funciones útiles",
@@ -19,7 +19,8 @@ setup(
         "outputstyles==1.0.0",
         "validators==0.28.1",
         "requests==2.31.0",
-        "tqdm==4.66.2"
+        "tqdm==4.66.2",
+        "curl_cffi==0.9.0"
     ],
     keywords=['python', 'utilsdsp'],
     classifiers=[

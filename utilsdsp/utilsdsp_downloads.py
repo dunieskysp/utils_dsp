@@ -1,13 +1,13 @@
 """
 Descargar un archivo desde internet:
     - validate_and_resquest: Comprobar sí una URL es válida y accesible
-    - __obtain_filename: Obtener nombre del archivo que se va a descargar
-    - __update_download_logs: Actualizar los logs de la descarga
+    - obtain_filename: Obtener nombre del archivo que se va a descargar
+    - update_download_logs: Actualizar los logs de la descarga
     - download_file: Descargar un archivo desde internet
 
 Descargar varios archivos desde internet
-    - __organize_urls_data: Organizar en tuplas los datos de las URLs a descargar
-    - __update_description_pbar: Actualizar descripción de la barra de progreso principal
+    - organize_urls_data: Organizar en tuplas los datos de las URLs a descargar
+    - update_description_pbar: Actualizar descripción de la barra de progreso principal
     - download_files: Descargar multiples archivos simultaneos desde internet
 """
 
@@ -18,13 +18,14 @@ from pathlib import Path
 from tqdm.auto import tqdm
 from datetime import datetime
 from urllib.parse import unquote
+from curl_cffi import requests as requests_curl
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from outputstyles import error, warning, info, success, bold
 from utilsdsp import sanitize_filename, create_downloads_dir, natural_size, join_path, validate_path, write_text_file, obtain_downloads_path, rename_exists_file
 
 
 # COMMENT Funciones para descargar un archivo
-def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None = 10, stream: bool = True, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, write_logs: bool = False, logs_path: str | None = None, print_msg: bool = True) -> bool | requests.Response | None:
+def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None = 10, stream: bool = True, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, r_curl: bool = False, write_logs: bool = False, logs_path: str | None = None, print_msg: bool = True) -> bool | requests.Response | None:
     """
     Comprobar sí una URL es válida y accesible
 
@@ -36,6 +37,7 @@ def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None
     headers (dict | None): Datos del Headers para la petición Get
     cookies (dict | None): Datos de las cookies para la petición Get
     auth (dict | None): Credenciales de autenticación
+    r_curl (bool): Usar el metodo requests de curl_cffi
 
     write_logs (bool): Guardar los logs
     logs_path (str): Ruta del archivo de los logs
@@ -56,7 +58,7 @@ def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None
             print(error("URL no válida:", "btn_ico"), info(url))
 
         # Atualizar los logs
-        __update_download_logs(
+        update_download_logs(
             write_logs=write_logs,
             logs_path=logs_path,
             msg_type="url_not_valid",
@@ -73,7 +75,8 @@ def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None
     # Hacer la petición a la URL
     try:
 
-        response = requests.get(
+        # Usar el requests tradicional o el de curl_cffi
+        response = (requests_curl if r_curl else requests).get(
             url=url,
             timeout=timeout,
             stream=stream,
@@ -100,7 +103,7 @@ def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None
             )
 
         # Atualizar los logs
-        __update_download_logs(
+        update_download_logs(
             write_logs=write_logs,
             logs_path=logs_path,
             msg_type="url_not_accessible",
@@ -111,7 +114,7 @@ def validate_and_resquest(url: str, accessible: bool = True, timeout: int | None
         return
 
 
-def __obtain_filename(response: requests.Response, url: str, missing_name: str | None = None) -> str:
+def obtain_filename(response: requests.Response, url: str, missing_name: str | None = None) -> str:
     """
     Obtener el nombre de un archivo que se va a descargar
     desde internet
@@ -148,7 +151,7 @@ def __obtain_filename(response: requests.Response, url: str, missing_name: str |
     return default_name
 
 
-def __update_download_logs(write_logs: bool, logs_path: str | Path, msg_type: str, url: str, filepath: str | None = None, err: str | None = None) -> None:
+def update_download_logs(write_logs: bool, logs_path: str | Path, msg_type: str, url: str, filepath: str | None = None, err: str | None = None) -> None:
     """
     Actualizar los logs de la descarga
 
@@ -203,7 +206,7 @@ def __update_download_logs(write_logs: bool, logs_path: str | Path, msg_type: st
             print(error("Error al actualizar los logs", "ico"), "\n" + str(err))
 
 
-def download_file(url: str, filename: str | None = None, path_dst: str | None = None, overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int | None = None, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour: str | None = None, position: int | None = None, desc_len: int | None = None, print_msg: bool = True) -> str | bool | None:
+def download_file(url: str, filename: str | None = None, path_dst: str | None = None, overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int | None = None, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, r_curl: bool = False, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour: str | None = None, position: int | None = None, desc_len: int | None = None, print_msg: bool = True) -> str | bool | None:
     """
     Descargar un archivo desde internet
 
@@ -224,6 +227,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
     headers (dict | None): Datos del Headers de la petición Get
     cookies (dict | None): Datos de las cookies de la petición Get
     auth (dict | None): Credenciales de autenticación
+    r_curl (bool): Usar el metodo requests de curl_cffi
 
     show_pbar (bool): Mostrar la barra de progreso
     disable_pbar (bool): Deshabilitar la barra de progreso
@@ -254,6 +258,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
         headers=headers,
         cookies=cookies,
         auth=auth,
+        r_curl=r_curl,
         write_logs=write_logs,
         logs_path=logs_path,
         print_msg=print_msg
@@ -274,7 +279,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
             print(error("El archivo no se encuentra o está vacio:", "ico"), info(url))
 
         # Atualizar los logs
-        __update_download_logs(
+        update_download_logs(
             write_logs=write_logs,
             logs_path=logs_path,
             msg_type="file_empty",
@@ -290,7 +295,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
 
     else:
 
-        filename = __obtain_filename(response, url, missing_name)
+        filename = obtain_filename(response, url, missing_name)
 
     # Obtener la ruta del archivo
     filepath = join_path(path_dst, filename)
@@ -311,7 +316,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
                 )
 
             # Atualizar los logs.
-            __update_download_logs(
+            update_download_logs(
                 write_logs=write_logs,
                 logs_path=logs_path,
                 msg_type="file_exists",
@@ -386,7 +391,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
             pbar.close()
 
             # Atualizar los logs
-            __update_download_logs(
+            update_download_logs(
                 write_logs=write_logs,
                 logs_path=logs_path,
                 msg_type="downloaded",
@@ -408,7 +413,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
             )
 
         # Atualizar los logs
-        __update_download_logs(
+        update_download_logs(
             write_logs=write_logs,
             logs_path=logs_path,
             msg_type="download_error",
@@ -421,7 +426,7 @@ def download_file(url: str, filename: str | None = None, path_dst: str | None = 
 
 
 # COMMENT Funciones para descargar varios archivos simultaneos
-def __organize_urls_data(urls_data: list, path_dst: str, char_separation: str = ",") -> list:
+def organize_urls_data(urls_data: list, path_dst: str, char_separation: str = ",") -> list:
     """
     Organizar en tuplas los datos de las URLs a descargar
 
@@ -472,7 +477,7 @@ def __organize_urls_data(urls_data: list, path_dst: str, char_separation: str = 
     return result
 
 
-def __update_description_pbar(result: str | bool | None, downloads_status: dict) -> tuple:
+def update_description_pbar(result: str | bool | None, downloads_status: dict) -> tuple:
     """
     Actualizar la descripción de la barra de progreso principal
     cuando se descarga varios archivos
@@ -527,7 +532,7 @@ def __update_description_pbar(result: str | bool | None, downloads_status: dict)
     return desc, downloads_status
 
 
-def download_files(urls_data: list, path_dst: str | None = None, max_workers: int = 1, char_separation: str = ",", overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int | None = None, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour_main: str | None = None, colour: str | None = None, desc_len: int | None = None, print_msg: bool = False) -> str | None:
+def download_files(urls_data: list, path_dst: str | None = None, max_workers: int = 1, char_separation: str = ",", overwrite: bool = False, rename: bool = False, missing_name: str | None = None, write_logs: bool = True, logs_path: str | None = None, timeout: int = 10, chunk_size: int | None = None, headers: dict | None = None, cookies: dict | None = None, auth: dict | None = None, r_curl: bool = False, show_pbar: bool = True, disable_pbar: bool = False, leave: bool = True, ncols: int | None = None, colour_main: str | None = None, colour: str | None = None, desc_len: int | None = None, print_msg: bool = False) -> str | None:
     """
     Descargar multiples archivos simultaneos desde internet
 
@@ -562,6 +567,7 @@ def download_files(urls_data: list, path_dst: str | None = None, max_workers: in
     headers (dict | None): Datos del Headers de la petición Get
     cookies (dict | None): Datos de las cookies de la petición Get
     auth (dict | None): Credenciales de autenticación
+    r_curl (bool | None): Usar el metodo requests de curl_cffi
 
     show_pbar (bool): Mostrar la barra de progreso
     disable_pbar (bool): Deshabilitar la barra de progreso
@@ -582,7 +588,7 @@ def download_files(urls_data: list, path_dst: str | None = None, max_workers: in
     path_dst = obtain_downloads_path(path_dst)
 
     # Organizar en tuplas los datos de las URLs
-    data_organized = __organize_urls_data(urls_data, path_dst, char_separation)
+    data_organized = organize_urls_data(urls_data, path_dst, char_separation)
 
     # Definir el color de la barra de progreso principal
     if not (os.getenv("COLAB_RELEASE_TAG") or colour_main):
@@ -630,6 +636,7 @@ def download_files(urls_data: list, path_dst: str | None = None, max_workers: in
                         headers=headers,
                         cookies=cookies,
                         auth=auth,
+                        r_curl=r_curl,
 
                         show_pbar=show_pbar,
                         disable_pbar=disable_pbar,
@@ -661,7 +668,7 @@ def download_files(urls_data: list, path_dst: str | None = None, max_workers: in
                     result = future.result()
 
                     # Actualizar la descripción de la barra de progreso
-                    desc, downloads_status = __update_description_pbar(
+                    desc, downloads_status = update_description_pbar(
                         result, downloads_status)
 
                     pbar.set_description(desc)
